@@ -45,8 +45,6 @@ for m = 1:numel(x)
     new_y(m) = y(m)*cos(f) + y(m)*sin(f);
 end
 
-
-
 %plot(x,y,new_x,new_y, '--')
-plot(x,y,rx,ry,'--')
+plot(xy
 axis equal
