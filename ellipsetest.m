@@ -11,13 +11,13 @@ centerX = 10;
 centerY = 15;
 orientation = -120;
 
-theta = 0 : 0.05 : 2*pi;
+theta = linspace(0,2*pi,1000);
 orientation=orientation*pi/180;
-xx = (majorAxis/2) * sin(theta) + centerX;
-yy = (minorAxis/2) * cos(theta) + centerY;
+x = (majorAxis/2) * sin(theta) + centerX;
+y = (minorAxis/2) * cos(theta) + centerY;
 
-xx2 = (xx-centerX)*cos(orientation) - (yy-centerY)*sin(orientation) + centerX;
-yy2 = (xx-centerX)*sin(orientation) + (yy-centerY)*cos(orientation) + centerY;
-plot(xx2,yy2)
+x2 = (x-centerX)*cos(orientation) - (y-centerY)*sin(orientation) + centerX;
+y2 = (x-centerX)*sin(orientation) + (y-centerY)*cos(orientation) + centerY;
+plot(x2,y2)
 axis equal
 grid
