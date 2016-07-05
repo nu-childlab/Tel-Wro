@@ -3,48 +3,44 @@
 %It is meant for envisioning what an image or path will look like
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-%copied the math from https://www.mathworks.com/matlabcentral/answers/86615-how-to-plot-an-ellipse?requestedDomain=www.mathworks.com
+%Math from http://stackoverflow.com/questions/29367548/how-to-apply-rotation-to-an-ellipse-defined-by-center-and-axis-lengths
 
-x1 = -50;
-y1 = 0;
-x2 = 50;
-y2 = 0;
-e = .9;
+%parameters
+majorAxis = 2;
+minorAxis = 1;
+centerX = 0;
+centerY = 0;
+circleAxis = .1;
 
-%center
-cx = 0;
-cy = 0;
-%axis lengths
-al = 25;
-bl = 10;
+orientation = -120;
 
-a = 1/2*sqrt((x2-x1)^2+(y2-y1)^2);
-b = a*sqrt(1-e^2);
-t = linspace(0,2*pi);
-X = a*cos(t);
-Y = b*sin(t);
-w = atan2(y2-y1,x2-x1);
-x = (x1+x2)/2 + X*cos(w) - Y*sin(w);
-y = (y1+y2)/2 + X*sin(w) + Y*cos(w);
+%setup
+theta = linspace(0,2*pi,1000);
+orientation=orientation*pi/180;
 
-%rotated equations
-rx = cx + (al*cos(t));
-ry = cy + (bl*cos(t));
+%Plot a central circle)
+circlex = (circleAxis/2) * sin(theta) + centerX;
+circley = (circleAxis/2) * cos(theta) + centerY;
 
-new_x = x;
-new_y = y;
+%Plot an ellipse
+x = (majorAxis/2) * sin(theta) + centerX;
+y = (minorAxis/2) * cos(theta) + centerY;
 
+x2 = (x-centerX)*cos(orientation) - (y-centerY)*sin(orientation) + centerX;
+y2 = (x-centerX)*sin(orientation) + (y-centerY)*cos(orientation) + centerY;
 
-%rotate (not transform-dependent)
-for m = 1:numel(x)
-%         if any(m == Breaks)
-%             f = randi(360);
-%         end 
-    f = 25;
-    new_x(m) = x(m)*cos(f) - x(m)*sin(f);
-    new_y(m) = y(m)*cos(f) + y(m)*sin(f);
+%Second ellipse
+orientation3 = 15;
+orientation3=orientation3*pi/180;
+
+x3 = (x-centerX)*cos(orientation3) - (y-centerY)*sin(orientation3) + centerX;
+y3 = (x-centerX)*sin(orientation3) + (y-centerY)*cos(orientation3) + centerY;
+
+for m = 1:numel(x3)
+    rpoints(m, 1) = nrpoints(m, 1) + (points(halfLoop + (loopFrames * petalnum), 1) *2);
+    rpoints(m, 2) = nrpoints(m, 2) + (points(halfLoop + (loopFrames * petalnum), 2) *2);
 end
 
-%plot(x,y,new_x,new_y, '--')
-plot(xy
+plot(x2,y2,circlex,circley,'--', x3,y3,'g')
 axis equal
+grid
