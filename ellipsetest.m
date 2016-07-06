@@ -57,7 +57,7 @@
 %%%%%%%NEXT
 %I'm gonna work on the for-loop point creation
 
-numberOfLoops = 5;
+numberOfLoops = 9;
 pointsx = [];
 pointsy = [];
 majorAxis = 2;
@@ -66,8 +66,10 @@ centerX = 0;
 centerY = 0;
 numberOfFrames = 100;
 theta = linspace(0,2*pi,numberOfFrames);
+%The orientation starts at 0, and ends at 360-360/numberOfLoops
+%This is to it doesn't make a complete circle, which would have two
+%overlapping ellipses.
 orientation = linspace(0,360-round(360/numberOfLoops),numberOfLoops);
-%Note: 0 to 360-(360/numberOfLoops)?
 
 
 for i = 1:numberOfLoops
@@ -94,12 +96,11 @@ for i = 1:numberOfLoops
     x3 = [x2(start:numberOfFrames) x2(1:start-1)];
     y3 = [y2(start:numberOfFrames) y2(1:start-1)];
 
+    %Finally, accumulate the points in full points arrays for easy graphing
+    %and drawing
     pointsx = [pointsx x3];
     pointsy = [pointsy y3];
-    disp(numel(pointsx))
 end
-
-n = numel(pointsx);
 
 plot(pointsx, pointsy)
 axis equal
