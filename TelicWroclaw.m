@@ -41,9 +41,7 @@ ifi = Screen('GetFlipInterval', window);
 %FINISHED PARAMETERS
 %%%%%%
 
-loopTime = 1;
 
-framesPerLoop = round(loopTime / ifi) + 1;
 
 minSpace = 20;
 %Current options: 0 or more
@@ -60,7 +58,7 @@ crossTime = 1;
 pauseTime = .5;
 %Length of space between loops presentation
 
-textsize = 18;
+textsize = 36;
 textspace = 1.5;
 
 rotateLoops = 1;
@@ -110,14 +108,18 @@ imageTexture = Screen('MakeTexture', window, imagename);
 
 %%%%%%TRAINING
 
+%trainSentence(window, textsize, textspace, 1, 'mass', screenYpixels)
 
 %%%%%%RUNNING
-pairOfLoops = {1, 2};
+numberOfLoops = 3;
 scale = screenYpixels / 10;%previously 15
 breakType = 'equal';
 vbl = Screen('Flip', window);
 
-animateEventLoops(pairOfLoops, framesPerLoop, ...
+loopTime = 1;
+framesPerLoop = round(loopTime / ifi) + 1;
+
+animateEventLoops(numberOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
     pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
     ifi, vbl)
@@ -136,16 +138,13 @@ end
 
 %%%%%START/FINISH/BREAK FUNCTIONS%%%%%
 
-function [] = animateEventLoops(pairOfLoops, framesPerLoop, ...
+function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
     pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
     ifi, vbl)
-white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);
-grey = white/2;
-for loop = pairOfLoops
-    %for each number of loops
-    numberOfLoops = loop{1};
+    white = WhiteIndex(screenNumber);
+    black = BlackIndex(screenNumber);
+    grey = white/2;
     [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
     totalpoints = numel(xpoints);
     Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
@@ -162,7 +161,6 @@ for loop = pairOfLoops
         if any(pt == Breaks)
             WaitSecs(breakTime);
         end
-        
         destRect = [xpoints(pt) - 128/2, ... %left
             ypoints(pt) - 128/2, ... %top
             xpoints(pt) + 128/2, ... %right
@@ -179,7 +177,6 @@ for loop = pairOfLoops
     Screen('FillRect', window, black);
     vbl = Screen('Flip', window);
     WaitSecs(pauseTime);
-end
 end
 
 
@@ -249,6 +246,47 @@ end
 
 %%%%%TRAINING FUNCTIONS%%%%%
 
+function [] = trainSentence(window, textsize, textspace, phase, cond, screenYpixels)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize + 5);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    Screen('FillRect', window, black);
+    Screen('Flip', window);
+    quote = ''''
+    if strcmp(cond, 'm')
+        verb = 'gleeb';
+    else
+        verb = 'blick';
+    end
+    
+    switch phase
+        case 1
+            DrawFormattedText(window, ['You' quote 're going to see the star ' verb 'ing.'],...
+                'center', 'center', white, 70, 0, 0, textspace);
+        case 2
+            DrawFormattedText(window, ['Now you' quote 're going to see the star ' verb 'ing some more.'],...
+                'center', 'center', white, 70, 0, 0, textspace);
+        case 3
+            if strcmp(cond,m)
+                DrawFormattedText(window, ['Last one for now. You' quote 're going to see the star ' verb 'ing.'],...
+                    'center', 'center', white, 70, 0, 0, textspace);
+            else
+                DrawFormattedText(window, ['Now you' quote 're going to see the star ' verb 'ing some more.'],...
+                    'center', 'center', white, 70, 0, 0, textspace);
+            end
+    end
+    
+    Screen('TextSize',window,textsize);
+    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', ...
+        screenYpixels/2+50, white, 70, 0, 0, textspace)
+    Screen('Flip', window);
+    % Wait for keypress
+    RestrictKeysForKbCheck(KbName('space'));
+    KbStrokeWait;
+    Screen('Flip', window);
+    RestrictKeysForKbCheck([]);
+end
 
 %%%%%STIMULUS MATH FUNCTIONS%%%%%
 
