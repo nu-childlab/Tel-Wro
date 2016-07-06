@@ -109,9 +109,14 @@ imageTexture = Screen('MakeTexture', window, imagename);
 
 
 %%%%%%RUNNING
-animateEventLoops(numberOfLoops, framesPerLoop, ...
+pairOfLoops = {4, 3};
+scale = screenYpixels / 10;%previously 15
+breakType = 'equal';
+vbl = Screen('Flip', window);
+
+animateEventLoops(pairOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, brk, breakTime, screenNumber, imageTexture, ...
+    pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
     ifi, vbl)
 
 
@@ -128,35 +133,37 @@ end
 
 %%%%%START/FINISH/BREAK FUNCTIONS%%%%%
 
-function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
+function [] = animateEventLoops(pairOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, brk, breakTime, screenNumber, imageTexture, ...
+    pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
     ifi, vbl)
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
 grey = white/2;
-for loop = numberOfLoops
+for loop = pairOfLoops
     %for each number of loops
-    points = getPoints(loop, loop * framesPerLoop);
-    totalpoints = numel(points)/2;
-    Breaks = makeBreaks(brk, totalpoints, loop, framesPerLoop, minSpace);
-    xpoints = (points(:, 1) .* scale) + xCenter;
-    ypoints = (points(:, 2) .* scale) + yCenter;
-    points = [xpoints ypoints];
+    numberOfLoops = loop{1};
+    [xpoints, ypoints] = getPoints(numberOfLoops, numberOfLoops * framesPerLoop);
+    totalpoints = numel(xpoints);
+    Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
+    xpoints = (xpoints .* scale) + xCenter;
+    ypoints = (ypoints .* scale) + yCenter;
+    %points = [xpoints ypoints];
     
     pt = 1;
     waitframes = 1;
     Screen('FillRect', window, grey);
     Screen('Flip', window);
     while pt <= totalpoints
+        %If the current point is a break point, pause
         if any(pt == Breaks)
             WaitSecs(breakTime);
         end
         
-        destRect = [points(pt, 1) - 128/2, ... %left
-            points(pt, 2) - 128/2, ... %top
-            points(pt, 1) + 128/2, ... %right
-            points(pt, 2) + 128/2]; %bottom
+        destRect = [xpoints(pt) - 128/2, ... %left
+            ypoints(pt) - 128/2, ... %top
+            xpoints(pt) + 128/2, ... %right
+            ypoints(pt) + 128/2]; %bottom
         
         % Draw the shape to the screen
         Screen('DrawTexture', window, imageTexture, [], destRect, 0);
@@ -296,300 +303,61 @@ function [list] = listcheck(list)
 end
 
 
-
-
-
 %%%%%TRAINING FUNCTIONS%%%%%
-
-function [] = trainSentence1(window, textsize, textspace, sent, screenYpixels)
-    Screen('TextFont',window,'Arial');
-    Screen('TextSize',window,textsize + 5);
-    black = BlackIndex(window);
-    white = WhiteIndex(window);
-    Screen('FillRect', window, black);
-    Screen('Flip', window);
-    DrawFormattedText(window, sent, 'center', 'center', white, 70, 0, 0, textspace);
-    
-    Screen('TextSize',window,textsize);
-    DrawFormattedText(window, 'This is the training period for this subpart of the experiment.',...
-        'center', screenYpixels/2-70, white, 70, 0, 0, textspace)
-    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', screenYpixels/2+50, white, 70, 0, 0, textspace)
-    Screen('Flip', window);
-    % Wait for keypress
-    RestrictKeysForKbCheck(KbName('space'));
-    KbStrokeWait;
-    Screen('Flip', window);
-    RestrictKeysForKbCheck([]);
-end
-
-function [] = trainSentence2(window, textsize, textspace, sent, screenYpixels)
-    Screen('TextFont',window,'Arial');
-    Screen('TextSize',window,textsize + 5);
-    black = BlackIndex(window);
-    white = WhiteIndex(window);
-    Screen('FillRect', window, black);
-    Screen('Flip', window);
-    DrawFormattedText(window, sent, 'center', 'center', white, 70, 0, 0, textspace);
-    
-    Screen('TextSize',window,textsize);
-    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', screenYpixels/2+50, white, 70, 0, 0, textspace);
-    Screen('Flip', window);
-    % Wait for keypress
-    RestrictKeysForKbCheck(KbName('space'));
-    KbStrokeWait;
-    Screen('Flip', window);
-    RestrictKeysForKbCheck([]);
-end
-
-function [] = trainSentence3(window, textsize, textspace, sent, screenYpixels)
-    Screen('TextFont',window,'Arial');
-    Screen('TextSize',window,textsize + 5);
-    black = BlackIndex(window);
-    white = WhiteIndex(window);
-    Screen('FillRect', window, black);
-    Screen('Flip', window);
-    DrawFormattedText(window, sent, 'center', 'center', white, 70, 0, 0, textspace);
-    
-    Screen('TextSize',window,textsize);
-    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', screenYpixels/2+50, white, 70, 0, 0, textspace);
-    Screen('Flip', window);
-    % Wait for keypress
-    RestrictKeysForKbCheck(KbName('space'));
-    KbStrokeWait;
-    Screen('Flip', window);
-    RestrictKeysForKbCheck([]);
-end
-
-function[] = oneloopobj(window, brk, screenYpixels, xCenter, yCenter, crossTime,...
-    loopFrames, minSpace, rotateLoops, displayTime)
-    scale = screenYpixels / 15;
-    white = WhiteIndex(window);
-    black = BlackIndex(window);
-    grey = white/2;
-    
-    
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    fixCross(xCenter, yCenter, black, window, crossTime)
-    points = getPoints(3, 3 * loopFrames);
-    totalpoints = numel(points)/2;
-
-    Breaks = makeBreaks(brk, totalpoints, 3, loopFrames, minSpace);
-    points = rotateGaps(points, totalpoints, loopFrames, Breaks, rotateLoops);
-    Breaks = sort(Breaks);
-
-    xpoints = (points(:, 1) .* scale) + xCenter;
-    ypoints = (points(:, 2) .* scale) + yCenter;
-    points = [xpoints ypoints];
-
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    for p = 1:Breaks(1)
-        if ~any(p == Breaks) && ~any(p+1 == Breaks)
-            Screen('DrawLine', window, black, points(p, 1), points(p, 2), ...
-                points(p+1, 1), points(p+1, 2), 5);
-        end
-    end
-    Screen('DrawingFinished', window);
-    %t1 = GetSecs;
-    vbl = Screen('Flip', window);
-    %puts the image on the screen
-    Screen('FillRect', window, black);
-    WaitSecs(displayTime);
-    vbl = Screen('Flip', window);
-    %blanks the screen
-end
-
-function[] = twoloopobj(window, brk, screenYpixels, xCenter, yCenter, crossTime,...
-    loopFrames, minSpace, rotateLoops, displayTime)
-    scale = screenYpixels / 15;
-    white = WhiteIndex(window);
-    black = BlackIndex(window);
-    grey = white/2;
-    
-    
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    fixCross(xCenter, yCenter, black, window, crossTime)
-    points = getPoints(3, 3 * loopFrames);
-    totalpoints = numel(points)/2;
-
-    Breaks = makeBreaks(brk, totalpoints, 3, loopFrames, minSpace);
-    points = rotateGaps(points, totalpoints, loopFrames, Breaks, rotateLoops);
-    Breaks = sort(Breaks);
-
-    xpoints = (points(:, 1) .* scale) + xCenter;
-    ypoints = (points(:, 2) .* scale) + yCenter;
-    points = [xpoints ypoints];
-
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    for p = 1:Breaks(2)
-        if ~any(p == Breaks) && ~any(p+1 == Breaks)
-            Screen('DrawLine', window, black, points(p, 1), points(p, 2), ...
-                points(p+1, 1), points(p+1, 2), 5);
-        end
-    end
-    Screen('DrawingFinished', window);
-    %t1 = GetSecs;
-    vbl = Screen('Flip', window);
-    %puts the image on the screen
-    Screen('FillRect', window, black);
-    WaitSecs(displayTime);
-    vbl = Screen('Flip', window);
-    %blanks the screen
-end
-
-function[] = oneloopev(window, brk, screenYpixels, xCenter, yCenter, crossTime,...
-    loopFrames, minSpace, ifi, imageTexture, vbl, breakTime)
-    scale = screenYpixels / 8;
-    white = WhiteIndex(window);
-    black = BlackIndex(window);
-    grey = white/2;
-
-
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    fixCross(xCenter, yCenter, black, window, crossTime)
-    
-    points = getPoints(3, 3 * loopFrames);
-    totalpoints = numel(points)/2;
-    Breaks = makeBreaks(brk, totalpoints, 3, loopFrames, minSpace);
-    xpoints = (points(:, 1) .* scale) + xCenter;
-    ypoints = (points(:, 2) .* scale) + yCenter;
-    points = [xpoints ypoints];
-    Breaks = sort(Breaks);
-    
-    pt = 1;
-    waitframes = 1;
-    %t1 = GetSecs;
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    while pt <= Breaks(1)
-        if any(pt == Breaks)
-            WaitSecs(breakTime);
-        end
-        
-        destRect = [points(pt, 1) - 128/2, ... %left
-            points(pt, 2) - 128/2, ... %top
-            points(pt, 1) + 128/2, ... %right
-            points(pt, 2) + 128/2]; %bottom
-        
-        % Draw the shape to the screen
-        Screen('DrawTexture', window, imageTexture, [], destRect, 0);
-        Screen('DrawingFinished', window);
-        % Flip to the screen
-        vbl  = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
-        pt = pt + 1;
-        
-    end
-end
-
-function[] = twoloopev(window, brk, screenYpixels, xCenter, yCenter, crossTime,...
-    loopFrames, minSpace, ifi, imageTexture, vbl, breakTime)
-    scale = screenYpixels / 8;
-    white = WhiteIndex(window);
-    black = BlackIndex(window);
-    grey = white/2;
-
-
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    fixCross(xCenter, yCenter, black, window, crossTime)
-    
-    points = getPoints(3, 3 * loopFrames);
-    totalpoints = numel(points)/2;
-    Breaks = makeBreaks(brk, totalpoints, 3, loopFrames, minSpace);
-    xpoints = (points(:, 1) .* scale) + xCenter;
-    ypoints = (points(:, 2) .* scale) + yCenter;
-    points = [xpoints ypoints];
-    Breaks = sort(Breaks);
-    
-    pt = 1;
-    waitframes = 1;
-    %t1 = GetSecs;
-    Screen('FillRect', window, grey);
-    Screen('Flip', window);
-    while pt <= Breaks(2)
-        if any(pt == Breaks)
-            WaitSecs(breakTime);
-        end
-        
-        destRect = [points(pt, 1) - 128/2, ... %left
-            points(pt, 2) - 128/2, ... %top
-            points(pt, 1) + 128/2, ... %right
-            points(pt, 2) + 128/2]; %bottom
-        
-        % Draw the shape to the screen
-        Screen('DrawTexture', window, imageTexture, [], destRect, 0);
-        Screen('DrawingFinished', window);
-        % Flip to the screen
-        vbl  = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
-        pt = pt + 1;
-        
-    end
-end
-
-function [] = endTraining(window, textsize, textspace, trainend, testq, screenYpixels)
-    Screen('TextFont',window,'Arial');
-    Screen('TextSize',window,textsize+5);
-    black = BlackIndex(window);
-    white = WhiteIndex(window);
-    Screen('FillRect', window, black);
-    Screen('Flip', window);
-    textcolor = white;
-    DrawFormattedText(window, testq, 'center', 'center',...
-        textcolor, 70, 0, 0, textspace);
-    
-    Screen('TextSize',window,textsize);
-    DrawFormattedText(window, trainend, 'center', screenYpixels/2-220,...
-        textcolor, 70, 0, 0, textspace);
-    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', screenYpixels/2+40,...
-        textcolor, 70, 0, 0, textspace);
-    
-    Screen('Flip', window);
-    % Wait for keypress
-    RestrictKeysForKbCheck(KbName('space'));
-    KbStrokeWait;
-    Screen('Flip', window);
-    RestrictKeysForKbCheck([]);
-end
-
-
-
-
 
 
 %%%%%STIMULUS MATH FUNCTIONS%%%%%
 
 
-function [points] = getPoints(loops, steps)
-    start = pi/loops;
-    theta = linspace(start, start + 2*pi, steps);
-    thetalist = reshape(theta, [numel(theta), 1]);
-    rholist = zeros([numel(theta), 1]);
-    for m = 1:numel(theta)
-        rholist(m, 1) = 1 + cos(loops*thetalist(m, 1));
+function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
+    xpoints = [];
+    ypoints = [];
+    majorAxis = 2;
+    minorAxis = 1;
+    centerX = 0;
+    centerY = 0;
+    theta = linspace(0,2*pi,numberOfFrames);
+    %The orientation starts at 0, and ends at 360-360/numberOfLoops
+    %This is to it doesn't make a complete circle, which would have two
+    %overlapping ellipses.
+    orientation = linspace(0,360-round(360/numberOfLoops),numberOfLoops);
+
+
+    for i = 1:numberOfLoops
+        %orientation calculated from above
+        loopOri=orientation(i)*pi/180;
+
+        %Start with the basic, unrotated ellipse
+        initx = (majorAxis/2) * sin(theta) + centerX;
+        inity = (minorAxis/2) * cos(theta) + centerY;
+
+        %Then rotate it
+        x = (initx-centerX)*cos(loopOri) - (inity-centerY)*sin(loopOri) + centerX;
+        y = (initx-centerX)*sin(loopOri) + (inity-centerY)*cos(loopOri) + centerY;
+
+        %then push it out based on the rotation
+        for m = 1:numel(x)
+            x2(m) = x(m) + (x(round(numel(x)*.75)) *1);
+            y2(m) = y(m) + (y(round(numel(y)*.75)) *1);
+        end
+
+        %It doesn't start from the right part of the ellipse, so I'm gonna
+        %shuffle it around so it does. (this is important I promise)    
+        start = round(numberOfFrames/4);
+        x3 = [x2(start:numberOfFrames) x2(1:start-1)];
+        y3 = [y2(start:numberOfFrames) y2(1:start-1)];
+
+        %Finally, accumulate the points in full points arrays for easy graphing
+        %and drawing
+        xpoints = [xpoints x3];
+        disp(numel(xpoints))
+        ypoints = [ypoints y3];
     end
-    %Creates two arrays; theta and rho. Theta defines the intervals and
-    %distance around the circle, while rho looks at the amplitude.
-
-    points = zeros([numel(theta), 2]);
-
-
-    for m = 1:numel(theta)
-        points(m, 1) = rholist(m, 1)*cos(thetalist(m, 1));
-        points(m, 2) = rholist(m, 1)*sin(thetalist(m, 1));
-    end
-
-    %The polar coordinates from theta and rho are translated into Cartesian
-    %coordinates. For a brief explanation, see
-    %https://www.mathsisfun.com/polar-cartesian-coordinates.html
 end
 
 function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpace)
     if strcmp(breakType, 'equal')
-        Breaks = int16(linspace(loopFrames, totalpoints, loops));
+        Breaks = 1 : totalpoints/loops : totalpoints;
 
     elseif strcmp(breakType, 'random')
         Breaks = randi([1 (loops*loopFrames)], 1, loops-1);
@@ -611,47 +379,5 @@ function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpa
 
     else
         Breaks = [];
-    end
-end
-
-
-function [rpoints] = rotateGaps(points, totalpoints, loopFrames, Breaks, rotateLoops)
-    petalnum = 0;
-    rpoints = points;
-    halfLoop = floor(loopFrames / 2);
-
-    %move to origin
-    for m = 1:totalpoints-1 
-        if any(m == Breaks)
-            petalnum = petalnum + 1;
-        end
-        rpoints(m, 1) = points(m, 1) - points(halfLoop + (loopFrames * petalnum), 1) / 2;
-        rpoints(m, 2) = points(m, 2) - points(halfLoop + (loopFrames * petalnum), 2) / 2;
-    end  
-
-    nrpoints = rpoints;
-    f = randi(360);
-
-    if rotateLoops
-        %rotate (not transform-dependent)
-        for m = 1:totalpoints-1
-            if any(m == Breaks)
-                f = randi(360);
-            end 
-            rpoints(m, 1) = nrpoints(m, 1)*cos(f) - nrpoints(m, 2)*sin(f);
-            rpoints(m, 2) = nrpoints(m, 2)*cos(f) + nrpoints(m, 1)*sin(f);
-        end
-    end
-
-    nrpoints = rpoints;
-    petalnum = 0;
-
-    %push based on new tip direction.
-    for m = 1:totalpoints-1
-        if any(m == Breaks)
-            petalnum = petalnum + 1;
-        end
-        rpoints(m, 1) = nrpoints(m, 1) + (points(halfLoop + (loopFrames * petalnum), 1) *2);
-        rpoints(m, 2) = nrpoints(m, 2) + (points(halfLoop + (loopFrames * petalnum), 2) *2);
     end
 end
