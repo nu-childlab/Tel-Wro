@@ -301,7 +301,7 @@ function [] = trainSentence(window, textsize, textspace, phase, breakType, scree
     else
         verb = 'blick';
     end
-    
+    %example comment
     switch phase
         case 1
             DrawFormattedText(window, ['You' quote 're going to see the star ' verb 'ing.'],...
