@@ -1,35 +1,107 @@
-%%%%%%FUNCTION DESCRIPTION
-%This file is designed to test plotting ellipses
-%It is meant for envisioning what an image or path will look like
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%copied the math from https://www.mathworks.com/matlabcentral/answers/86615-how-to-plot-an-ellipse?requestedDomain=www.mathworks.com
-
-x1 = -50;
-y1 = 0;
-x2 = 50;
-y2 = 0;
-e = .9;
-
-a = 1/2*sqrt((x2-x1)^2+(y2-y1)^2);
-b = a*sqrt(1-e^2);
-t = linspace(0,2*pi);
-X = a*cos(t);
-Y = b*sin(t);
-w = atan2(y2-y1,x2-x1);
-x = (x1+x2)/2 + X*cos(w) - Y*sin(w);
-y = (y1+y2)/2 + X*sin(w) + Y*cos(w);
-
-% if rotateLoops
-%     %rotate (not transform-dependent)
-%     for m = 1:totalpoints-1
-%         if any(m == Breaks)
-%             f = randi(360);
-%         end 
-%         rpoints(m, 1) = nrpoints(m, 1)*cos(f) - nrpoints(m, 2)*sin(f);
-%         rpoints(m, 2) = nrpoints(m, 2)*cos(f) + nrpoints(m, 1)*sin(f);
-%     end
+% %%%%%%FUNCTION DESCRIPTION
+% %This file is designed to test plotting ellipses
+% %It is meant for envisioning what an image or path will look like
+% %%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% %Math from http://stackoverflow.com/questions/29367548/how-to-apply-rotation-to-an-ellipse-defined-by-center-and-axis-lengths
+% 
+% %parameters
+% majorAxis = 2;
+% minorAxis = 1;
+% centerX = 0;
+% centerY = 0;
+% circleAxis = .1;
+% 
+% orientation = -120;
+% 
+% %setup
+% theta = linspace(0,2*pi,1000);
+% orientation=orientation*pi/180;
+% 
+% %Plot a central circle)
+% circlex = (circleAxis/2) * sin(theta) + centerX;
+% circley = (circleAxis/2) * cos(theta) + centerY;
+% 
+% %Plot an ellipse
+% x = (majorAxis/2) * sin(theta) + centerX;
+% y = (minorAxis/2) * cos(theta) + centerY;
+% 
+% x2 = (x-centerX)*cos(orientation) - (y-centerY)*sin(orientation) + centerX;
+% y2 = (x-centerX)*sin(orientation) + (y-centerY)*cos(orientation) + centerY;
+% 
+% %Push out a bit (the edge should hit the origin; you'll see what I mean)
+% for m = 1:numel(x2)
+%     xx2(m) = x2(m) + (x2(round(numel(x2)*.75)) *1);
+%     yy2(m) = y2(m) + (y2(round(numel(y2)*.75)) *1);
 % end
+% 
+% %Second ellipse
+% orientation3 = 15;
+% orientation3=orientation3*pi/180;
+% 
+% x3 = (x-centerX)*cos(orientation3) - (y-centerY)*sin(orientation3) + centerX;
+% y3 = (x-centerX)*sin(orientation3) + (y-centerY)*cos(orientation3) + centerY;
+% 
+% %Push out a bit (the edge should hit the origin; you'll see what I mean)
+% for m = 1:numel(x3)
+%     xx3(m) = x3(m) + (x3(round(numel(x3)*.75)) *1);
+%     yy3(m) = y3(m) + (y3(round(numel(y3)*.75)) *1);
+% end
+% 
+% % For plotting basic ellipses
+% % plot(x2,y2,circlex,circley,'--', x3,y3,'g', xx3,yy3,'m', xx2,yy2,'c')
+% % axis equal
+% % grid
 
-plot(x,y)
+
+%%%%%%%NEXT
+%I'm gonna work on the for-loop point creation
+
+numberOfLoops = 9;
+pointsx = [];
+pointsy = [];
+majorAxis = 2;
+minorAxis = 1;
+centerX = 0;
+centerY = 0;
+numberOfFrames = 100;
+theta = linspace(0,2*pi,numberOfFrames);
+%The orientation starts at 0, and ends at 360-360/numberOfLoops
+%This is to it doesn't make a complete circle, which would have two
+%overlapping ellipses.
+orientation = linspace(0,360-round(360/numberOfLoops),numberOfLoops);
+
+
+for i = 1:numberOfLoops
+    %orientation calculated from above
+    loopOri=orientation(i)*pi/180;
+    
+    %Start with the basic, unrotated ellipse
+    initx = (majorAxis/2) * sin(theta) + centerX;
+    inity = (minorAxis/2) * cos(theta) + centerY;
+    
+    %Then rotate it
+    x = (initx-centerX)*cos(loopOri) - (inity-centerY)*sin(loopOri) + centerX;
+    y = (initx-centerX)*sin(loopOri) + (inity-centerY)*cos(loopOri) + centerY;
+    
+    %then push it out based on the rotation
+    for m = 1:numel(x)
+        x2(m) = x(m) + (x(round(numel(x)*.75)) *1);
+        y2(m) = y(m) + (y(round(numel(y)*.75)) *1);
+    end
+    
+    %It doesn't start from the right part of the ellipse, so I'm gonna
+    %shuffle it around so it does. (this is important I promise)    
+    start = round(numberOfFrames/4);
+    x3 = [x2(start:numberOfFrames) x2(1:start-1)];
+    y3 = [y2(start:numberOfFrames) y2(1:start-1)];
+
+    %Finally, accumulate the points in full points arrays for easy graphing
+    %and drawing
+    pointsx = [pointsx x3];
+    pointsy = [pointsy y3];
+end
+
+plot(pointsx, pointsy)
 axis equal
+grid
