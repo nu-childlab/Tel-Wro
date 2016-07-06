@@ -41,7 +41,7 @@ ifi = Screen('GetFlipInterval', window);
 %FINISHED PARAMETERS
 %%%%%%
 
-loopTime = .75;
+loopTime = 1;
 
 framesPerLoop = round(loopTime / ifi) + 1;
 
@@ -109,12 +109,12 @@ imageTexture = Screen('MakeTexture', window, imagename);
 
 
 %%%%%%RUNNING
-numberOfLoops = 3;
-scale = screenYpixels / 15;
+pairOfLoops = {1, 2};
+scale = screenYpixels / 10;%previously 15
 breakType = 'equal';
 vbl = Screen('Flip', window);
 
-animateEventLoops(numberOfLoops, framesPerLoop, ...
+animateEventLoops(pairOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
     pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
     ifi, vbl)
@@ -133,35 +133,37 @@ end
 
 %%%%%START/FINISH/BREAK FUNCTIONS%%%%%
 
-function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
+function [] = animateEventLoops(pairOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
     pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
     ifi, vbl)
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
 grey = white/2;
-for loop = numberOfLoops
+for loop = pairOfLoops
     %for each number of loops
-    points = getPoints(loop, loop * framesPerLoop);
-    totalpoints = numel(points)/2;
-    Breaks = makeBreaks(breakType, totalpoints, loop, framesPerLoop, minSpace);
-    xpoints = (points(:, 1) .* scale) + xCenter;
-    ypoints = (points(:, 2) .* scale) + yCenter;
-    points = [xpoints ypoints];
+    numberOfLoops = loop{1};
+    [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
+    totalpoints = numel(xpoints);
+    Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
+    xpoints = (xpoints .* scale) + xCenter;
+    ypoints = (ypoints .* scale) + yCenter;
+    %points = [xpoints ypoints];
     
     pt = 1;
     waitframes = 1;
     Screen('FillRect', window, grey);
     Screen('Flip', window);
     while pt <= totalpoints
+        %If the current point is a break point, pause
         if any(pt == Breaks)
             WaitSecs(breakTime);
         end
         
-        destRect = [points(pt, 1) - 128/2, ... %left
-            points(pt, 2) - 128/2, ... %top
-            points(pt, 1) + 128/2, ... %right
-            points(pt, 2) + 128/2]; %bottom
+        destRect = [xpoints(pt) - 128/2, ... %left
+            ypoints(pt) - 128/2, ... %top
+            xpoints(pt) + 128/2, ... %right
+            ypoints(pt) + 128/2]; %bottom
         
         % Draw the shape to the screen
         Screen('DrawTexture', window, imageTexture, [], destRect, 0);
@@ -242,65 +244,6 @@ function[] = fixCross(xCenter, yCenter, black, window, crossTime)
 end
 
 
-
-
-%%%%%%INPUT CHECKING FUNCTIONS%%%%%
-
-function [subj] = subjcheck(subj)
-    if ~strncmpi(subj, 's', 1)
-        %forgotten s
-        subj = ['s', subj];
-    end
-    if strcmp(subj,'s')
-        subj = input(['Please enter a subject ' ...
-                'ID:'], 's');
-        subj = subjcheck(subj);
-    end
-    numstrs = ['1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0'];
-    for x = 2:numel(subj)
-        if ~any(subj(x) == numstrs)
-            subj = input(['Subject ID ' subj ' is invalid. It should ' ...
-                'consist of an "s" followed by only numbers. Please use a ' ...
-                'different ID:'], 's');
-            subj = subjcheck(subj);
-            return
-        end
-    end
-    if (exist([subj '.csv'], 'file') == 2) && ~strcmp(subj, 's999')...
-            && ~strcmp(subj,'s998')
-        temp = input(['Subject ID ' subj ' is already in use. Press y '...
-            'to continue writing to this file, or press '...
-            'anything else to try a new ID: '], 's');
-        if strcmp(temp,'y')
-            return
-        else
-            subj = input(['Please enter a new subject ' ...
-                'ID:'], 's');
-            subj = subjcheck(subj);
-        end
-    end
-end
-
-function [tel] = telcheck(tel)
-    while ~strcmp(tel, 'a') && ~strcmp(tel, 't')
-        tel = input('Condition must be a or t. Please enter a or t:', 's');
-    end
-end
-
-function [list] = listcheck(list)
-    if strcmp(list, 'some') || strcmp(list, 'all')
-        check = input('some and all are test lists. Type y to continue using a test list.', 's');
-        if strcmp(check, 'y')
-            return
-        end
-    end
-    while ~strcmp(list, 'blue') && ~strcmp(list, 'pink') && ~strcmp(list, 'green') && ...
-            ~strcmp(list, 'orange') && ~strcmp(list, 'yellow')
-        list = input('List must be a valid color. Please enter blue, pink, green, orange, or yellow:', 's');
-    end
-end
-
-
 %%%%%TRAINING FUNCTIONS%%%%%
 
 
@@ -308,13 +251,13 @@ end
 
 
 function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
-    pointsx = [];
-    pointsy = [];
+    xpoints = [];
+    ypoints = [];
     majorAxis = 2;
     minorAxis = 1;
     centerX = 0;
     centerY = 0;
-    theta = linspace(0,2*pi,numberOfFrames);
+    theta = linspace(0,2*pi,numberOfFrames-1);
     %The orientation starts at 0, and ends at 360-360/numberOfLoops
     %This is to it doesn't make a complete circle, which would have two
     %overlapping ellipses.
@@ -341,20 +284,20 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
 
         %It doesn't start from the right part of the ellipse, so I'm gonna
         %shuffle it around so it does. (this is important I promise)    
-        start = round(numberOfFrames/4);
+        start = round(numberOfFrames-1/4);
         x3 = [x2(start:numberOfFrames) x2(1:start-1)];
         y3 = [y2(start:numberOfFrames) y2(1:start-1)];
 
         %Finally, accumulate the points in full points arrays for easy graphing
         %and drawing
-        pointsx = [pointsx x3];
-        pointsy = [pointsy y3];
+        xpoints = [xpoints 0 x3];
+        ypoints = [ypoints 0 y3];
     end
 end
 
 function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpace)
     if strcmp(breakType, 'equal')
-        Breaks = int16(linspace(loopFrames, totalpoints, loops));
+        Breaks = 1 : totalpoints/loops : totalpoints;
 
     elseif strcmp(breakType, 'random')
         Breaks = randi([1 (loops*loopFrames)], 1, loops-1);

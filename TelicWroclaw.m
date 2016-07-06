@@ -41,7 +41,7 @@ ifi = Screen('GetFlipInterval', window);
 %FINISHED PARAMETERS
 %%%%%%
 
-loopTime = .75;
+loopTime = 1;
 
 framesPerLoop = round(loopTime / ifi) + 1;
 
@@ -108,8 +108,11 @@ imageTexture = Screen('MakeTexture', window, imagename);
 
 
 
+%%%%%%TRAINING
+
+
 %%%%%%RUNNING
-pairOfLoops = {4, 3};
+pairOfLoops = {1, 2};
 scale = screenYpixels / 10;%previously 15
 breakType = 'equal';
 vbl = Screen('Flip', window);
@@ -143,7 +146,7 @@ grey = white/2;
 for loop = pairOfLoops
     %for each number of loops
     numberOfLoops = loop{1};
-    [xpoints, ypoints] = getPoints(numberOfLoops, numberOfLoops * framesPerLoop);
+    [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
     totalpoints = numel(xpoints);
     Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
     xpoints = (xpoints .* scale) + xCenter;
@@ -244,65 +247,6 @@ function[] = fixCross(xCenter, yCenter, black, window, crossTime)
 end
 
 
-
-
-%%%%%%INPUT CHECKING FUNCTIONS%%%%%
-
-function [subj] = subjcheck(subj)
-    if ~strncmpi(subj, 's', 1)
-        %forgotten s
-        subj = ['s', subj];
-    end
-    if strcmp(subj,'s')
-        subj = input(['Please enter a subject ' ...
-                'ID:'], 's');
-        subj = subjcheck(subj);
-    end
-    numstrs = ['1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0'];
-    for x = 2:numel(subj)
-        if ~any(subj(x) == numstrs)
-            subj = input(['Subject ID ' subj ' is invalid. It should ' ...
-                'consist of an "s" followed by only numbers. Please use a ' ...
-                'different ID:'], 's');
-            subj = subjcheck(subj);
-            return
-        end
-    end
-    if (exist([subj '.csv'], 'file') == 2) && ~strcmp(subj, 's999')...
-            && ~strcmp(subj,'s998')
-        temp = input(['Subject ID ' subj ' is already in use. Press y '...
-            'to continue writing to this file, or press '...
-            'anything else to try a new ID: '], 's');
-        if strcmp(temp,'y')
-            return
-        else
-            subj = input(['Please enter a new subject ' ...
-                'ID:'], 's');
-            subj = subjcheck(subj);
-        end
-    end
-end
-
-function [tel] = telcheck(tel)
-    while ~strcmp(tel, 'a') && ~strcmp(tel, 't')
-        tel = input('Condition must be a or t. Please enter a or t:', 's');
-    end
-end
-
-function [list] = listcheck(list)
-    if strcmp(list, 'some') || strcmp(list, 'all')
-        check = input('some and all are test lists. Type y to continue using a test list.', 's');
-        if strcmp(check, 'y')
-            return
-        end
-    end
-    while ~strcmp(list, 'blue') && ~strcmp(list, 'pink') && ~strcmp(list, 'green') && ...
-            ~strcmp(list, 'orange') && ~strcmp(list, 'yellow')
-        list = input('List must be a valid color. Please enter blue, pink, green, orange, or yellow:', 's');
-    end
-end
-
-
 %%%%%TRAINING FUNCTIONS%%%%%
 
 
@@ -310,6 +254,7 @@ end
 
 
 function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
+
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
@@ -350,7 +295,6 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         %Finally, accumulate the points in full points arrays for easy graphing
         %and drawing
         xpoints = [xpoints x3];
-        disp(numel(xpoints))
         ypoints = [ypoints y3];
     end
 end
