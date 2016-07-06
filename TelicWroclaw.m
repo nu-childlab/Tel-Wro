@@ -96,9 +96,27 @@ if s1 > screenYpixels || s2 > screenYpixels
 end
 
 % Make the image into a texture
-imageTexture = Screen('MakeTexture', window, imagename);
+starTexture = Screen('MakeTexture', window, imagename);
 
+theImageLocation = 'star3.png';
+[imagename, ~, alpha] = imread(theImageLocation);
+imagename(:,:,4) = alpha(:,:);
 
+% Get the size of the image
+[s1, s2, ~] = size(imagename);
+
+% Here we check if the image is too big to fit on the screen and abort if
+% it is. See ImageRescaleDemo to see how to rescale an image.
+if s1 > screenYpixels || s2 > screenYpixels
+    disp('ERROR! Image is too big to fit on the screen');
+    sca;
+    return;
+end
+
+% Make the image into a texture
+heartTexture = Screen('MakeTexture', window, imagename);
+
+scale = screenYpixels / 10;%previously 15
 
 
 
@@ -107,22 +125,46 @@ imageTexture = Screen('MakeTexture', window, imagename);
 
 
 %%%%%%TRAINING
-
-%trainSentence(window, textsize, textspace, 1, 'mass', screenYpixels)
-
-%%%%%%RUNNING
-numberOfLoops = 3;
-scale = screenYpixels / 10;%previously 15
-breakType = 'equal';
 vbl = Screen('Flip', window);
-
+breakType = 'equal';
+trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
+numberOfLoops = 1;
 loopTime = 1;
 framesPerLoop = round(loopTime / ifi) + 1;
-
 animateEventLoops(numberOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
+    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
     ifi, vbl)
+
+trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
+numberOfLoops = 2;
+loopTime = 1;
+framesPerLoop = round(loopTime / ifi) + 1;
+animateEventLoops(numberOfLoops, framesPerLoop, ...
+    minSpace, scale, xCenter, yCenter, window, ...
+    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    ifi, vbl)
+
+trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
+numberOfLoops = 3;
+loopTime = 1;
+framesPerLoop = round(loopTime / ifi) + 1;
+animateEventLoops(numberOfLoops, framesPerLoop, ...
+    minSpace, scale, xCenter, yCenter, window, ...
+    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    ifi, vbl)
+
+
+%%%%%%RUNNING
+% numberOfLoops = 3;
+% breakType = 'equal';
+% loopTime = 1;
+% framesPerLoop = round(loopTime / ifi) + 1;
+% 
+% animateEventLoops(numberOfLoops, framesPerLoop, ...
+%     minSpace, scale, xCenter, yCenter, window, ...
+%     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+%     ifi, vbl)
 
 
 
@@ -246,15 +288,15 @@ end
 
 %%%%%TRAINING FUNCTIONS%%%%%
 
-function [] = trainSentence(window, textsize, textspace, phase, cond, screenYpixels)
+function [] = trainSentence(window, textsize, textspace, phase, breakType, screenYpixels)
     Screen('TextFont',window,'Arial');
     Screen('TextSize',window,textsize + 5);
     black = BlackIndex(window);
     white = WhiteIndex(window);
     Screen('FillRect', window, black);
     Screen('Flip', window);
-    quote = ''''
-    if strcmp(cond, 'm')
+    quote = '''';
+    if strcmp(breakType, 'random')
         verb = 'gleeb';
     else
         verb = 'blick';
@@ -268,18 +310,18 @@ function [] = trainSentence(window, textsize, textspace, phase, cond, screenYpix
             DrawFormattedText(window, ['Now you' quote 're going to see the star ' verb 'ing some more.'],...
                 'center', 'center', white, 70, 0, 0, textspace);
         case 3
-            if strcmp(cond,m)
+            if strcmp(breakType, 'random')
                 DrawFormattedText(window, ['Last one for now. You' quote 're going to see the star ' verb 'ing.'],...
                     'center', 'center', white, 70, 0, 0, textspace);
             else
-                DrawFormattedText(window, ['Now you' quote 're going to see the star ' verb 'ing some more.'],...
+                DrawFormattedText(window, ['Let' quote 's see that again. You' quote 're going to see the star ' verb 'ing some more.'],...
                     'center', 'center', white, 70, 0, 0, textspace);
             end
     end
     
     Screen('TextSize',window,textsize);
     DrawFormattedText(window, 'Ready? Press spacebar.', 'center', ...
-        screenYpixels/2+50, white, 70, 0, 0, textspace)
+        screenYpixels/2+50, white, 70, 0, 0, textspace);
     Screen('Flip', window);
     % Wait for keypress
     RestrictKeysForKbCheck(KbName('space'));
