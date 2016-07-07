@@ -2,11 +2,7 @@
 Still in-progress
 
 # Things to Implement
-~Align ellipses to center on origin
-
-~Integrate ellipses into paths
-
-~calculate ellipse rotation based on number of ellipses
+~Construct experiment frame
 
 ~Incorporate time/number of frames
 
