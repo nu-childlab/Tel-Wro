@@ -118,53 +118,58 @@ heartTexture = Screen('MakeTexture', window, imagename);
 
 scale = screenYpixels / 10;%previously 15
 
-
+vbl = Screen('Flip', window);
 
 %%%%%%DATA FILES
 
 
 
-%%%%%%TRAINING
-vbl = Screen('Flip', window);
-breakType = 'equal';
-trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
-numberOfLoops = 1;
-loopTime = 1;
-framesPerLoop = round(loopTime / ifi) + 1;
-animateEventLoops(numberOfLoops, framesPerLoop, ...
-    minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-    ifi, vbl)
-
-trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
-numberOfLoops = 2;
-loopTime = 1;
-framesPerLoop = round(loopTime / ifi) + 1;
-animateEventLoops(numberOfLoops, framesPerLoop, ...
-    minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-    ifi, vbl)
-
-trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
-numberOfLoops = 3;
-loopTime = 1;
-framesPerLoop = round(loopTime / ifi) + 1;
-animateEventLoops(numberOfLoops, framesPerLoop, ...
-    minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-    ifi, vbl)
-
-
 %%%%%%RUNNING
-% numberOfLoops = 3;
+%for each block
+
+%%%%%%TRAINING
+
 % breakType = 'equal';
+% numberOfLoops = 1;
 % loopTime = 1;
+% totaltime =
 % framesPerLoop = round(loopTime / ifi) + 1;
-% 
+
+% trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
 % animateEventLoops(numberOfLoops, framesPerLoop, ...
 %     minSpace, scale, xCenter, yCenter, window, ...
 %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
 %     ifi, vbl)
+% 
+% trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
+% numberOfLoops = 2;
+% loopTime = 1;
+% framesPerLoop = round(loopTime / ifi) + 1;
+% animateEventLoops(numberOfLoops, framesPerLoop, ...
+%     minSpace, scale, xCenter, yCenter, window, ...
+%     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+%     ifi, vbl)
+% 
+% trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
+% numberOfLoops = 3;
+% loopTime = 1;
+% framesPerLoop = round(loopTime / ifi) + 1;
+% animateEventLoops(numberOfLoops, framesPerLoop, ...
+%     minSpace, scale, xCenter, yCenter, window, ...
+%     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+%     ifi, vbl)
+
+
+%%%%%%RUNNING
+numberOfLoops = 5;
+breakType = 'equal';
+loopTime = 1;
+framesPerLoop = round(loopTime / ifi) + 1;
+
+animateEventLoops(numberOfLoops, framesPerLoop, ...
+    minSpace, scale, xCenter, yCenter, window, ...
+    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    ifi, vbl)
 
 
 
@@ -216,6 +221,7 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
         pt = pt + 1;
         
     end
+    %end %ending the block
     Screen('FillRect', window, black);
     vbl = Screen('Flip', window);
     WaitSecs(pauseTime);
@@ -334,14 +340,18 @@ end
 
 
 function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
-
+    %OK, so, the ellipses weren't lining up at the origin very well, so
+    %smoothframes designates a few frames to smooth this out. It uses fewer
+    %frames for the ellipse, and instead spends a few frames going from the
+    %end of the ellipse to the origin.
+    smoothframes = 3;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
     minorAxis = 1;
     centerX = 0;
     centerY = 0;
-    theta = linspace(0,2*pi,numberOfFrames);
+    theta = linspace(0,2*pi,numberOfFrames-smoothframes);
     %The orientation starts at 0, and ends at 360-360/numberOfLoops
     %This is to it doesn't make a complete circle, which would have two
     %overlapping ellipses.
@@ -367,10 +377,12 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         end
 
         %It doesn't start from the right part of the ellipse, so I'm gonna
-        %shuffle it around so it does. (this is important I promise)    
-        start = round(numberOfFrames/4);
-        x3 = [x2(start:numberOfFrames) x2(1:start-1)];
-        y3 = [y2(start:numberOfFrames) y2(1:start-1)];
+        %shuffle it around so it does. (this is important I promise)  
+        %It also adds in some extra frames to smooth the transition between
+        %ellipses
+        start = round((numberOfFrames-smoothframes)/4);
+        x3 = [x2(start:numberOfFrames-smoothframes) x2(1:start) linspace(x2(start),0,smoothframes)];
+    y3 = [y2(start:numberOfFrames-smoothframes) y2(1:start) linspace(x2(start),0,smoothframes)];
 
         %Finally, accumulate the points in full points arrays for easy graphing
         %and drawing
