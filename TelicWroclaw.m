@@ -44,12 +44,9 @@ ifi = Screen('GetFlipInterval', window);
 
 
 minSpace = 20;
-%Current options: 0 or more
-%minSpace only affects 'random'; it is the minimum possible number of
-%frames between steps
+%the minimum possible number of frames between steps
 
 breakTime = .5;
-%Current options: 0 or more
 %The number of seconds for each pause
 
 crossTime = 1;
@@ -60,10 +57,6 @@ pauseTime = .5;
 
 textsize = 36;
 textspace = 1.5;
-
-rotateLoops = 1;
-%Current options: 0 or 1
-%1 means each loop is rotated a random number of degrees. 0 means they aren't.
 
 %Matlab's strings are stupid, so I have quotes and quotes with spaces in
 %variables here
@@ -123,56 +116,68 @@ vbl = Screen('Flip', window);
 %%%%%%DATA FILES
 
 
+%%%%%Conditions and List Setup
+
+%Format is [number_of_loops total_animation_time]
+
+blockList = {'mass' 'count'};
 
 %%%%%%RUNNING
-%for each block
+for condition = blockList
+    if strcmp(condition,'mass')
+        breakType = 'random';
+    else
+        breakType='equal';
+    end
+    
+    %Note to self: Maybe use hash tables to arrange timing for loop sets?
 
-%%%%%%TRAINING
+    %%%%%%TRAINING
 
-% breakType = 'equal';
-% numberOfLoops = 1;
-% loopTime = 1;
-% totaltime =
-% framesPerLoop = round(loopTime / ifi) + 1;
+    % breakType = 'equal';
+    % numberOfLoops = 1;
+    % loopTime = 1;
+    % totaltime =
+    % framesPerLoop = round(loopTime / ifi) + 1;
 
-% trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
-% animateEventLoops(numberOfLoops, framesPerLoop, ...
-%     minSpace, scale, xCenter, yCenter, window, ...
-%     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-%     ifi, vbl)
-% 
-% trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
-% numberOfLoops = 2;
-% loopTime = 1;
-% framesPerLoop = round(loopTime / ifi) + 1;
-% animateEventLoops(numberOfLoops, framesPerLoop, ...
-%     minSpace, scale, xCenter, yCenter, window, ...
-%     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-%     ifi, vbl)
-% 
-% trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
-% numberOfLoops = 3;
-% loopTime = 1;
-% framesPerLoop = round(loopTime / ifi) + 1;
-% animateEventLoops(numberOfLoops, framesPerLoop, ...
-%     minSpace, scale, xCenter, yCenter, window, ...
-%     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-%     ifi, vbl)
-
-
-%%%%%%RUNNING
-numberOfLoops = 5;
-breakType = 'equal';
-loopTime = 1;
-framesPerLoop = round(loopTime / ifi) + 1;
-
-animateEventLoops(numberOfLoops, framesPerLoop, ...
-    minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-    ifi, vbl)
+    % trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
+    % animateEventLoops(numberOfLoops, framesPerLoop, ...
+    %     minSpace, scale, xCenter, yCenter, window, ...
+    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    %     ifi, vbl)
+    % 
+    % trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
+    % numberOfLoops = 2;
+    % loopTime = 1;
+    % framesPerLoop = round(loopTime / ifi) + 1;
+    % animateEventLoops(numberOfLoops, framesPerLoop, ...
+    %     minSpace, scale, xCenter, yCenter, window, ...
+    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    %     ifi, vbl)
+    % 
+    % trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
+    % numberOfLoops = 3;
+    % loopTime = 1;
+    % framesPerLoop = round(loopTime / ifi) + 1;
+    % animateEventLoops(numberOfLoops, framesPerLoop, ...
+    %     minSpace, scale, xCenter, yCenter, window, ...
+    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    %     ifi, vbl)
 
 
+    %%%%%%RUNNING
+    numberOfLoops = 1;
+    breakType = 'equal';
+    loopTime = 1;
+    framesPerLoop = round(loopTime / ifi) + 1;
 
+    animateEventLoops(numberOfLoops, framesPerLoop, ...
+        minSpace, scale, xCenter, yCenter, window, ...
+        pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+        ifi, vbl)
+
+
+end %ending the block
 %%%%%%Finishing and exiting
 sca
 Priority(0);
@@ -221,7 +226,6 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
         pt = pt + 1;
         
     end
-    %end %ending the block
     Screen('FillRect', window, black);
     vbl = Screen('Flip', window);
     WaitSecs(pauseTime);
