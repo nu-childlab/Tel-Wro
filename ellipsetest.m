@@ -56,16 +56,14 @@
 
 %%%%%%%NEXT
 %I'm gonna work on the for-loop point creation
-
-numberOfLoops = 9;
-pointsx = [];
-pointsy = [];
+smoothframes = 3;
+xpoints = [];
+ypoints = [];
 majorAxis = 2;
 minorAxis = 1;
 centerX = 0;
 centerY = 0;
-numberOfFrames = 100;
-theta = linspace(0,2*pi,numberOfFrames);
+theta = linspace(0,2*pi,numberOfFrames-smoothframes);
 %The orientation starts at 0, and ends at 360-360/numberOfLoops
 %This is to it doesn't make a complete circle, which would have two
 %overlapping ellipses.
@@ -75,31 +73,33 @@ orientation = linspace(0,360-round(360/numberOfLoops),numberOfLoops);
 for i = 1:numberOfLoops
     %orientation calculated from above
     loopOri=orientation(i)*pi/180;
-    
+
     %Start with the basic, unrotated ellipse
     initx = (majorAxis/2) * sin(theta) + centerX;
     inity = (minorAxis/2) * cos(theta) + centerY;
-    
+
     %Then rotate it
     x = (initx-centerX)*cos(loopOri) - (inity-centerY)*sin(loopOri) + centerX;
     y = (initx-centerX)*sin(loopOri) + (inity-centerY)*cos(loopOri) + centerY;
-    
+
     %then push it out based on the rotation
     for m = 1:numel(x)
         x2(m) = x(m) + (x(round(numel(x)*.75)) *1);
         y2(m) = y(m) + (y(round(numel(y)*.75)) *1);
     end
-    
+
     %It doesn't start from the right part of the ellipse, so I'm gonna
-    %shuffle it around so it does. (this is important I promise)    
-    start = round(numberOfFrames/4);
-    x3 = [x2(start:numberOfFrames) x2(1:start-1)];
-    y3 = [y2(start:numberOfFrames) y2(1:start-1)];
+    %shuffle it around so it does. (this is important I promise)  
+    %It also adds in some extra frames to smooth the transition between
+    %ellipses
+    start = round((numberOfFrames-smoothframes)/4);
+    x3 = [x2(start:numberOfFrames-smoothframes) x2(1:start) linspace(x2(start),0,smoothframes)];
+y3 = [y2(start:numberOfFrames-smoothframes) y2(1:start) linspace(x2(start),0,smoothframes)];
 
     %Finally, accumulate the points in full points arrays for easy graphing
     %and drawing
-    pointsx = [pointsx x3];
-    pointsy = [pointsy y3];
+    xpoints = [xpoints x3];
+    ypoints = [ypoints y3];
 end
 
 plot(pointsx, pointsy)
