@@ -41,17 +41,12 @@ ifi = Screen('GetFlipInterval', window);
 %FINISHED PARAMETERS
 %%%%%%
 
-loopTime = 1;
 
-framesPerLoop = round(loopTime / ifi) + 1;
 
 minSpace = 20;
-%Current options: 0 or more
-%minSpace only affects 'random'; it is the minimum possible number of
-%frames between steps
+%the minimum possible number of frames between steps
 
 breakTime = .5;
-%Current options: 0 or more
 %The number of seconds for each pause
 
 crossTime = 1;
@@ -60,12 +55,8 @@ crossTime = 1;
 pauseTime = .5;
 %Length of space between loops presentation
 
-textsize = 18;
+textsize = 36;
 textspace = 1.5;
-
-rotateLoops = 1;
-%Current options: 0 or 1
-%1 means each loop is rotated a random number of degrees. 0 means they aren't.
 
 %Matlab's strings are stupid, so I have quotes and quotes with spaces in
 %variables here
@@ -82,7 +73,7 @@ Priority(MaxPriority(window));
 
 %%%%%%Shape Prep
 
-theImageLocation = 'star3.png';
+theImageLocation = 'star.png';
 [imagename, ~, alpha] = imread(theImageLocation);
 imagename(:,:,4) = alpha(:,:);
 
@@ -98,32 +89,98 @@ if s1 > screenYpixels || s2 > screenYpixels
 end
 
 % Make the image into a texture
-imageTexture = Screen('MakeTexture', window, imagename);
+starTexture = Screen('MakeTexture', window, imagename);
 
+theImageLocation = 'heart.png';
+[imagename, ~, alpha] = imread(theImageLocation);
+imagename(:,:,4) = alpha(:,:);
 
+% Get the size of the image
+[s1, s2, ~] = size(imagename);
 
+% Here we check if the image is too big to fit on the screen and abort if
+% it is. See ImageRescaleDemo to see how to rescale an image.
+if s1 > screenYpixels || s2 > screenYpixels
+    disp('ERROR! Image is too big to fit on the screen');
+    sca;
+    return;
+end
 
+% Make the image into a texture
+heartTexture = Screen('MakeTexture', window, imagename);
+
+scale = screenYpixels / 10;%previously 15
+
+vbl = Screen('Flip', window);
 
 %%%%%%DATA FILES
 
 
+%%%%%Conditions and List Setup
 
-%%%%%%TRAINING
+%Format is [number_of_loops total_animation_time]
 
+blockList = {'mass'}; %'count'};
+keys = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+correlated_values = [.75, 1.5, 2.25, 3, 3.75, 4.5, 5.25, 6, 6.75];
+anticorrelated_values = [9, 8.25, 7.5, 6.75, 6, 5.25, 4.5, 3.75, 3];
 
 %%%%%%RUNNING
-pairOfLoops = {1, 2};
-scale = screenYpixels / 10;%previously 15
-breakType = 'equal';
-vbl = Screen('Flip', window);
-
-animateEventLoops(pairOfLoops, framesPerLoop, ...
-    minSpace, scale, xCenter, yCenter, window, ...
-    pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
-    ifi, vbl)
+for condition = blockList
+    if strcmp(condition,'mass')
+        breakType = 'random';
+    else
+        breakType='equal';
+    end
 
 
+    %%%%%%TRAINING
 
+    % breakType = 'equal';
+    % numberOfLoops = 1;
+    % loopTime = 1;
+    % totaltime =
+    % framesPerLoop = round(loopTime / ifi) + 1;
+
+    % trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
+    % animateEventLoops(numberOfLoops, framesPerLoop, ...
+    %     minSpace, scale, xCenter, yCenter, window, ...
+    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    %     ifi, vbl)
+    % 
+    % trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
+    % numberOfLoops = 2;
+    % loopTime = 1;
+    % framesPerLoop = round(loopTime / ifi) + 1;
+    % animateEventLoops(numberOfLoops, framesPerLoop, ...
+    %     minSpace, scale, xCenter, yCenter, window, ...
+    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    %     ifi, vbl)
+    % 
+    % trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
+    % numberOfLoops = 3;
+    % loopTime = 1;
+    % framesPerLoop = round(loopTime / ifi) + 1;
+    % animateEventLoops(numberOfLoops, framesPerLoop, ...
+    %     minSpace, scale, xCenter, yCenter, window, ...
+    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+    %     ifi, vbl)
+
+
+    %%%%%%RUNNING
+    numberOfLoops = 6;
+    breakType = 'equal';
+    totaltime = anticorrelated_values(numberOfLoops);
+    loopTime = totaltime/numberOfLoops;
+    framesPerLoop = round(loopTime / ifi) + 1;
+
+    animateEventLoops(numberOfLoops, framesPerLoop, ...
+        minSpace, scale, xCenter, yCenter, window, ...
+        pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+        ifi, vbl)
+
+
+end %ending the block
 %%%%%%Finishing and exiting
 sca
 Priority(0);
@@ -136,16 +193,13 @@ end
 
 %%%%%START/FINISH/BREAK FUNCTIONS%%%%%
 
-function [] = animateEventLoops(pairOfLoops, framesPerLoop, ...
+function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
     pauseTime, breakType, breakTime, screenNumber, imageTexture, ...
     ifi, vbl)
-white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);
-grey = white/2;
-for loop = pairOfLoops
-    %for each number of loops
-    numberOfLoops = loop{1};
+    white = WhiteIndex(screenNumber);
+    black = BlackIndex(screenNumber);
+    grey = white/2;
     [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
     totalpoints = numel(xpoints);
     Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
@@ -162,7 +216,6 @@ for loop = pairOfLoops
         if any(pt == Breaks)
             WaitSecs(breakTime);
         end
-        
         destRect = [xpoints(pt) - 128/2, ... %left
             ypoints(pt) - 128/2, ... %top
             xpoints(pt) + 128/2, ... %right
@@ -179,7 +232,6 @@ for loop = pairOfLoops
     Screen('FillRect', window, black);
     vbl = Screen('Flip', window);
     WaitSecs(pauseTime);
-end
 end
 
 
@@ -249,19 +301,64 @@ end
 
 %%%%%TRAINING FUNCTIONS%%%%%
 
+function [] = trainSentence(window, textsize, textspace, phase, breakType, screenYpixels)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize + 5);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    Screen('FillRect', window, black);
+    Screen('Flip', window);
+    quote = '''';
+    if strcmp(breakType, 'random')
+        verb = 'gleeb';
+    else
+        verb = 'blick';
+    end
+    
+    switch phase
+        case 1
+            DrawFormattedText(window, ['You' quote 're going to see the star ' verb 'ing.'],...
+                'center', 'center', white, 70, 0, 0, textspace);
+        case 2
+            DrawFormattedText(window, ['Now you' quote 're going to see the star ' verb 'ing some more.'],...
+                'center', 'center', white, 70, 0, 0, textspace);
+        case 3
+            if strcmp(breakType, 'random')
+                DrawFormattedText(window, ['Last one for now. You' quote 're going to see the star ' verb 'ing.'],...
+                    'center', 'center', white, 70, 0, 0, textspace);
+            else
+                DrawFormattedText(window, ['Let' quote 's see that again. You' quote 're going to see the star ' verb 'ing some more.'],...
+                    'center', 'center', white, 70, 0, 0, textspace);
+            end
+    end
+    
+    Screen('TextSize',window,textsize);
+    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', ...
+        screenYpixels/2+50, white, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    % Wait for keypress
+    RestrictKeysForKbCheck(KbName('space'));
+    KbStrokeWait;
+    Screen('Flip', window);
+    RestrictKeysForKbCheck([]);
+end
 
 %%%%%STIMULUS MATH FUNCTIONS%%%%%
 
 
 function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
-
+    %OK, so, the ellipses weren't lining up at the origin very well, so
+    %smoothframes designates a few frames to smooth this out. It uses fewer
+    %frames for the ellipse, and instead spends a few frames going from the
+    %end of the ellipse to the origin.
+    smoothframes = 3;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
     minorAxis = 1;
     centerX = 0;
     centerY = 0;
-    theta = linspace(0,2*pi,numberOfFrames);
+    theta = linspace(0,2*pi,numberOfFrames-smoothframes);
     %The orientation starts at 0, and ends at 360-360/numberOfLoops
     %This is to it doesn't make a complete circle, which would have two
     %overlapping ellipses.
@@ -287,10 +384,12 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         end
 
         %It doesn't start from the right part of the ellipse, so I'm gonna
-        %shuffle it around so it does. (this is important I promise)    
-        start = round(numberOfFrames/4);
-        x3 = [x2(start:numberOfFrames) x2(1:start-1)];
-        y3 = [y2(start:numberOfFrames) y2(1:start-1)];
+        %shuffle it around so it does. (this is important I promise)  
+        %It also adds in some extra frames to smooth the transition between
+        %ellipses
+        start = round((numberOfFrames-smoothframes)/4);
+        x3 = [x2(start:numberOfFrames-smoothframes) x2(1:start) linspace(x2(start),0,smoothframes)];
+        y3 = [y2(start:numberOfFrames-smoothframes) y2(1:start) linspace(x2(start),0,smoothframes)];
 
         %Finally, accumulate the points in full points arrays for easy graphing
         %and drawing
