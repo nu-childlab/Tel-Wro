@@ -73,7 +73,7 @@ Priority(MaxPriority(window));
 
 %%%%%%Shape Prep
 
-theImageLocation = 'star.png';
+theImageLocation = 'star3.png';
 [imagename, ~, alpha] = imread(theImageLocation);
 imagename(:,:,4) = alpha(:,:);
 
@@ -91,7 +91,7 @@ end
 % Make the image into a texture
 starTexture = Screen('MakeTexture', window, imagename);
 
-theImageLocation = 'heart.png';
+theImageLocation = 'star3.png';
 [imagename, ~, alpha] = imread(theImageLocation);
 imagename(:,:,4) = alpha(:,:);
 
@@ -168,10 +168,10 @@ for condition = blockList
 
 
     %%%%%%RUNNING
-    numberOfLoops = 6;
+    numberOfLoops = 8;
     breakType = 'equal';
-    totaltime = anticorrelated_values(numberOfLoops);
-    loopTime = totaltime/numberOfLoops;
+    totaltime = anticorrelated_values(numberOfLoops)
+    loopTime = round(totaltime/numberOfLoops)
     framesPerLoop = round(loopTime / ifi) + 1;
 
     animateEventLoops(numberOfLoops, framesPerLoop, ...
