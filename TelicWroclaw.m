@@ -64,6 +64,40 @@ quote = '''';
 squote = ' ''';
 
 %%%%%%
+%LISTS
+%%%%%%
+
+list = 'test';
+if strcmp(list, 'test')
+    trial_list = {[4 5; 5 4;]; [9 7; 7 9]; [6 8; 8 6];};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'blue')
+    trial_list = {[4 5; 5 4;]; [4 6; 6 4]; [4 7; 7 4]; [4 8; 8 4]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [9 5; 5 9]; [9 6; 6 9]; [9 7; 7 9]; [9 8; 8 9]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'pink')
+    trial_list = {[5 6; 6 5]; [5 7; 7 5]; [5 8; 8 5]; [5 9; 9 5]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [8 4; 4 8]; [8 5; 5 8]; [8 6; 6 8]; [8 7; 7 8]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'green')
+    trial_list = {[6 7; 7 6]; [6 8; 8 6]; [6 9; 9 6]; [5 9; 9 5]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [8 4; 4 8]; [7 4; 4 7]; [7 5; 5 7]; [7 6; 6 7]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'orange')
+    trial_list = {[7 8; 8 7]; [6 8; 8 6]; [5 8; 8 5]; [4 8; 8 4]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [9 5; 5 9]; [8 5; 5 8]; [7 5; 5 7]; [6 5; 5 6]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'yellow')
+    trial_list = {[4 9; 9 4]; [5 9; 9 5]; [6 9; 9 6]; [7 9; 9 7]; [8 9; 9 8]; ...
+        [5 4; 4 5]; [6 4; 4 6]; [7 4; 4 7]; [8 4; 4 8]; [9 4; 4 9]};
+    trial_list = [trial_list;trial_list];
+end
+
+shuff = randperm(length(trial_list));
+trial_list = trial_list(shuff,:);
+
+
+%%%%%%
 %THE ACTUAL FUNCTION!!!
 %%%%%%
 
@@ -168,16 +202,20 @@ for condition = blockList
 
 
     %%%%%%RUNNING
-    numberOfLoops = 6;
-    breakType = 'equal';
-    totaltime = anticorrelated_values(numberOfLoops);
-    loopTime = totaltime/numberOfLoops;
-    framesPerLoop = round(loopTime / ifi) + 1;
+    
+    for trial = trial_list
 
-    animateEventLoops(numberOfLoops, framesPerLoop, ...
-        minSpace, scale, xCenter, yCenter, window, ...
-        pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-        ifi, vbl)
+        numberOfLoops = 6;
+        breakType = 'equal';
+        totaltime = anticorrelated_values(numberOfLoops);
+        loopTime = totaltime/numberOfLoops;
+        framesPerLoop = round(loopTime / ifi) + 1;
+
+        animateEventLoops(numberOfLoops, framesPerLoop, ...
+            minSpace, scale, xCenter, yCenter, window, ...
+            pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+            ifi, vbl)
+    end
 
 
 end %ending the block
