@@ -26,7 +26,6 @@ grey = white/2;
 
 %%%Screen Stuff
 
-PsychDebugWindowConfiguration(-1, .5) %opacity
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
 %opens a window in the most external screen and colors it)
 Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -104,6 +103,10 @@ trial_list = trial_list(shuff,:);
 correlation_list = correlation_list(shuff);
 
 
+%%%%%%
+%THE ACTUAL FUNCTION!!!
+%%%%%%
+
 %%%%%%%Screen Prep
 HideCursor;	% Hide the mouse cursor
 Priority(MaxPriority(window));
@@ -151,9 +154,6 @@ scale = screenYpixels / 10;%previously 15
 vbl = Screen('Flip', window);
 
 %%%%%%DATA FILES
-
-dataFile = fopen('TELICZData.csv', 'a');
-fprintf(dataFile, '%s\n', '')
 
 
 %%%%%Conditions and List Setup
@@ -209,46 +209,32 @@ for condition = blockList
 
     %%%%%%RUNNING
     
-    for x = 1:1
-        fprintf(dataFile, '%d///', numel(trial_list))
+    for x = numel(trial_list)
         trial = trial_list{x};
         trial = trial(randi([1, 2], 1, 1), :);
-        fprintf(dataFile, '%d  %d,', trial(1), trial(2))
 
-        numberOfLoops = 7;%trial(1);
-%         if strcmp(correlation_list{x}, 'corr')
-%             totaltime = correlated_values(numberOfLoops);
-%         else
+        numberOfLoops = trial(1);
+        if strcmp(correlation_list(x), 'corr')
+            totaltime = correlated_values(numberOfLoops);
+        else
             totaltime = anticorrelated_values(numberOfLoops);
-%         end
-        fprintf(dataFile, '%s,', correlation_list{x})
+        end
         loopTime = totaltime/numberOfLoops;
-        fprintf(dataFile, '%d,', loopTime)
         framesPerLoop = round(loopTime / ifi) + 1;
-%         if framesPerLoop < 40
-%             fprintf(dataFile, '%s,', 'CHANGED');
-%             framesPerLoop = 40;
-%         end
-        fprintf(dataFile, '%d,', framesPerLoop)
 
         animateEventLoops(numberOfLoops, framesPerLoop, ...
             minSpace, scale, xCenter, yCenter, window, ...
-            pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+            pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
             ifi, vbl)
         
-
-        numberOfLoops = 9;%trial(2);
-%         if strcmp(correlation_list(x), 'corr')
-%             totaltime = correlated_values(numberOfLoops);
-%         else
+        numberOfLoops = trial();
+        if strcmp(correlation_list(x), 'corr')
+            totaltime = correlated_values(numberOfLoops);
+        else
             totaltime = anticorrelated_values(numberOfLoops);
-%         end
+        end
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
-%         if framesPerLoop < 40
-%             fprintf(dataFile, '%s,', 'CHANGED');
-%             framesPerLoop = 40;
-%         end
 
         animateEventLoops(numberOfLoops, framesPerLoop, ...
             minSpace, scale, xCenter, yCenter, window, ...
@@ -428,7 +414,7 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %smoothframes designates a few frames to smooth this out. It uses fewer
     %frames for the ellipse, and instead spends a few frames going from the
     %end of the ellipse to the origin.
-    smoothframes = 5;
+    smoothframes = 3;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
