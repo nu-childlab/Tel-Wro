@@ -103,10 +103,6 @@ trial_list = trial_list(shuff,:);
 correlation_list = correlation_list(shuff);
 
 
-%%%%%%
-%THE ACTUAL FUNCTION!!!
-%%%%%%
-
 %%%%%%%Screen Prep
 HideCursor;	% Hide the mouse cursor
 Priority(MaxPriority(window));
@@ -155,6 +151,17 @@ vbl = Screen('Flip', window);
 
 %%%%%%DATA FILES
 
+initprint = 0;
+if ~(exist('~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclawdata.csv', 'file') == 2)
+    initprint = 1;
+end
+dataFile = fopen('~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclawdata.csv', 'a');
+subjFile = fopen(['~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclaw' subj '.csv'],'a');
+if initprint
+    fprintf(dataFile, ['subj,time,cond,break,list,trial1,trial2,contrast,response\n']);
+end
+fprintf(subjFile, 'subj,time,cond,break,list,trial1,trial2,contrast,response\n');
+lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%d\n';
 
 %%%%%Conditions and List Setup
 
@@ -242,7 +249,11 @@ for condition = blockList
             pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
             ifi, vbl)
         
-        getResponse(window, breakType, textsize, screenYpixels)
+        [response, time] = getResponse(window, breakType, textsize, screenYpixels);
+        fprintf(subjFile, 'subj,time,cond,break,list,trial1,trial2,contrast,response\n');
+        lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%d\n';
+        fprintf(dataFile, lineFormat, subj, time*1000, condition, breakType, list, trial(1),...
+            compareLoops(2), abs(compareLoops(1) - compareLoops(2)), str2double(response));
     end
 
 
