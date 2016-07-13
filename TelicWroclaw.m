@@ -218,6 +218,7 @@ for condition = blockList
             disp('test corr')
             totaltime = correlated_values(numberOfLoops);
         end
+        disp('test1')
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
 
@@ -225,11 +226,16 @@ for condition = blockList
             minSpace, scale, xCenter, yCenter, window, ...
             pauseTime, breakType, breakTime, screenNumber, starTexture, ...
             ifi, vbl)
-        
+        disp('test2')
         numberOfLoops = trial(2);
-        totaltime = correlated_values(numberOfLoops);
+        totaltime = anticorrelated_values(numberOfLoops);
+        if strcmp(correlation_list{x}, 'corr')
+            disp('test corr')
+            totaltime = correlated_values(numberOfLoops);
+        end
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
+        disp('test3')
 
         animateEventLoops(numberOfLoops, framesPerLoop, ...
             minSpace, scale, xCenter, yCenter, window, ...
@@ -258,13 +264,15 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     white = WhiteIndex(screenNumber);
     black = BlackIndex(screenNumber);
     grey = white/2;
+    disp('test01')
     [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
     totalpoints = numel(xpoints);
+    disp('test000')
     Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
+    disp('test02')
     xpoints = (xpoints .* scale) + xCenter;
     ypoints = (ypoints .* scale) + yCenter;
     %points = [xpoints ypoints];
-    
     pt = 1;
     waitframes = 1;
     Screen('FillRect', window, grey);
@@ -409,7 +417,7 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %smoothframes designates a few frames to smooth this out. It uses fewer
     %frames for the ellipse, and instead spends a few frames going from the
     %end of the ellipse to the origin.
-    smoothframes = 5;
+    smoothframes = 3;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
@@ -422,7 +430,7 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %overlapping ellipses.
     orientation = linspace(0,360-round(360/numberOfLoops),numberOfLoops);
 
-
+    disp('test12')
     for i = 1:numberOfLoops
         %orientation calculated from above
         loopOri=orientation(i)*pi/180;
@@ -434,7 +442,6 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         %Then rotate it
         x = (initx-centerX)*cos(loopOri) - (inity-centerY)*sin(loopOri) + centerX;
         y = (initx-centerX)*sin(loopOri) + (inity-centerY)*cos(loopOri) + centerY;
-
         %then push it out based on the rotation
         for m = 1:numel(x)
             x2(m) = x(m) + (x(round(numel(x)*.75)) *1);
@@ -448,20 +455,22 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         start = round((numberOfFrames-smoothframes)/4);
         x3 = [x2(start:numberOfFrames-smoothframes) x2(1:start) linspace(x2(start),0,smoothframes)];
         y3 = [y2(start:numberOfFrames-smoothframes) y2(1:start) linspace(x2(start),0,smoothframes)];
-
         %Finally, accumulate the points in full points arrays for easy graphing
         %and drawing
         xpoints = [xpoints x3];
         ypoints = [ypoints y3];
     end
+    disp(xpoints(26))
 end
 
 function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpace)
+    disp('breaks1')
     if strcmp(breakType, 'equal')
         Breaks = 1 : totalpoints/loops : totalpoints;
 
     elseif strcmp(breakType, 'random')
         Breaks = randi([1 (loops*loopFrames)], 1, loops-1);
+        disp('breaksrandom')
         x = 1;
         y = 2;
         while x <= numel(Breaks)
@@ -469,16 +478,19 @@ function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpa
                 if x ~= y && abs(Breaks(x) - Breaks(y)) < minSpace || Breaks(x) < minSpace ||...
                         (loops*loopFrames) - Breaks(x) < minSpace
                     Breaks(x) =  randi([1, (loops*loopFrames)], 1, 1);
+                    disp('minspace error')
                     x = 1;
-                    y = 0;
+                    y = 1;
                 end
                 y = y + 1;
             end
             x = x + 1;
             y = 1;
         end
+        disp('breaks2')
 
     else
         Breaks = [];
     end
+    disp('breaksend')
 end
