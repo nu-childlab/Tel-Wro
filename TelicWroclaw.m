@@ -55,7 +55,7 @@ crossTime = 1;
 pauseTime = .5;
 %Length of space between loops presentation
 
-textsize = 36;
+textsize = 40;
 textspace = 1.5;
 
 %Matlab's strings are stupid, so I have quotes and quotes with spaces in
@@ -73,9 +73,9 @@ correlation_list = {'corr';'corr';'corr';'corr';'corr';'corr';'corr';...
 
 list = 'test';
 if strcmp(list, 'test')
-    trial_list = {[4 5; 5 4;]; [9 7; 7 9]; [6 8; 8 6];};
+    trial_list = {[4 5; 5 4;]; [9 7; 7 9]};
     trial_list = [trial_list;trial_list];
-    correlation_list = {'corr';'corr';'corr';'anti';'anti';'anti'};
+    correlation_list = {'corr';'corr';'anti';'anti'};
 elseif strcmp(list, 'blue')
     trial_list = {[4 5; 5 4;]; [4 6; 6 4]; [4 7; 7 4]; [4 8; 8 4]; [4 9; 9 4]; ...
         [9 4; 4 9]; [9 5; 5 9]; [9 6; 6 9]; [9 7; 7 9]; [9 8; 8 9]};
@@ -175,8 +175,6 @@ for condition = blockList
 
 
     %%%%%%TRAINING
-
-    % breakType = 'equal';
     % numberOfLoops = 1;
     % loopTime = 1;
     % totaltime =
@@ -206,10 +204,15 @@ for condition = blockList
     %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
     %     ifi, vbl)
 
+    testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
     %%%%%%RUNNING
+    
+    
      
-    for x = 1:length(trial_list)
+    for x = 1:1%length(trial_list)
+        
+        %first animation, with star
         trial = trial_list{x};
         trial = trial(randi([1,2]),:);
         numberOfLoops = trial(1);
@@ -224,6 +227,8 @@ for condition = blockList
             minSpace, scale, xCenter, yCenter, window, ...
             pauseTime, breakType, breakTime, screenNumber, starTexture, ...
             ifi, vbl)
+        
+        %second animation, with heart
         numberOfLoops = trial(2);
         totaltime = anticorrelated_values(numberOfLoops);
         if strcmp(correlation_list{x}, 'corr')
@@ -236,6 +241,8 @@ for condition = blockList
             minSpace, scale, xCenter, yCenter, window, ...
             pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
             ifi, vbl)
+        
+        getResponse(window, breakType, textsize, screenYpixels)
     end
 
 
@@ -261,7 +268,7 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     grey = white/2;
     [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
     totalpoints = numel(xpoints);
-    Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
+    Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, minSpace);
     xpoints = (xpoints .* scale) + xCenter;
     ypoints = (ypoints .* scale) + yCenter;
     %points = [xpoints ypoints];
@@ -297,40 +304,43 @@ end
 
 %%%%%%RESPONSE FUNCTION%%%%%
 
-function [response, time] = getResponse(window, screenXpixels, screenYpixels, textsize, testq)
+function [response, time] = getResponse(window, breakType, textsize, screenYpixels)
     black = BlackIndex(window);
     white = WhiteIndex(window);
     textcolor = white;
-    xedgeDist = floor(screenXpixels / 3);
-    numstep = floor(linspace(xedgeDist, screenXpixels - xedgeDist, 7));
     Screen('TextFont',window,'Arial');
-    Screen('TextSize',window,textsize);
-
-    DrawFormattedText(window, testq, 'center', screenYpixels/3, textcolor, 70);
-    for x = 1:7
-        DrawFormattedText(window, int2str(x), numstep(x), 'center', textcolor, 70);
+    Screen('TextSize',window,textsize+6);
+    quote = '''';
+    if strcmp(breakType, 'random')
+        verb = 'gleeb';
+    else
+        verb = 'blick';
     end
-    DrawFormattedText(window, '  not  \n at all \nsimilar', numstep(1) - (xedgeDist / 25),...
-        screenYpixels/2 + 30, textcolor);
-    DrawFormattedText(window, 'very \nsimilar', numstep(7) - (xedgeDist / 25), screenYpixels/2 + 30, textcolor);
+    DrawFormattedText(window, ['Did the star ' verb ' more than the heart?'],...
+        'center', 'center', textcolor, 70, 0, 0, 1.5);
+    Screen('TextSize',window,textsize);
+    DrawFormattedText(window, ['Press ' quote 'f' quote ' for YES and ' quote 'j' quote ' for NO'],...
+        'center', screenYpixels/2 + 80, textcolor, 70);
     Screen('Flip',window);
 
     % Wait for the user to input something meaningful
     inLoop=true;
-    oneseven = [KbName('1!') KbName('2@') KbName('3#') KbName('4$')...
-        KbName('5%') KbName('6^') KbName('7&')];
-%     numkeys = [89 90 91 92 93 94 95];
+    %response = '-1';
+    yesno = [KbName('f') KbName('j')];
     starttime = GetSecs;
     while inLoop
-        response = 0;
+        %code = [];
         [keyIsDown, ~, keyCode]=KbCheck;
         if keyIsDown
             code = find(keyCode);
-            if any(code(1) == oneseven)
+            if any(code(1) == yesno)
                 endtime = GetSecs;
-                response = KbName(code);
-                response = response(1);
-                if response
+                if code == 9
+                    response = 'f';
+                    inLoop=false;
+                end
+                if code== 13
+                    response= 'j';
                     inLoop=false;
                 end
             end
@@ -357,7 +367,7 @@ function[] = fixCross(xCenter, yCenter, black, window, crossTime)
 end
 
 
-%%%%%TRAINING FUNCTIONS%%%%%
+%%%%%SENTENCE/INSTRUCTIONS FUNCTIONS%%%%%
 
 function [] = trainSentence(window, textsize, textspace, phase, breakType, screenYpixels)
     Screen('TextFont',window,'Arial');
@@ -401,7 +411,39 @@ function [] = trainSentence(window, textsize, textspace, phase, breakType, scree
     RestrictKeysForKbCheck([]);
 end
 
-%%%%%STIMULUS MATH FUNCTIONS%%%%%
+function [] = testingSentence(window, textsize, textspace, breakType, screenYpixels)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    Screen('FillRect', window, black);
+    Screen('Flip', window);
+    quote = '''';
+    if strcmp(breakType, 'random')
+        verb = 'gleeb';
+    else
+        verb = 'blick';
+    end
+    
+    DrawFormattedText(window, ['Now you' quote 're going to see pairs of '...
+        'videos, involving the star and a heart. For each pair, you are '...
+        'going to be asked:'], 'center', screenYpixels/2-(screenYpixels/5), white, 70, 0, 0, textspace);
+    
+    Screen('TextSize',window,textsize+15);
+    DrawFormattedText(window, ['Did the star ' verb ' more than the heart?'],...
+                'center', 'center', white, 70, 0, 0, textspace);
+    Screen('TextSize',window,textsize);
+    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', ...
+        screenYpixels/2+(screenYpixels/5), white, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    % Wait for keypress
+    RestrictKeysForKbCheck(KbName('space'));
+    KbStrokeWait;
+    Screen('Flip', window);
+    RestrictKeysForKbCheck([]);
+end
+
+%%%%%POINTS AND BREAKS FUNCTIONS%%%%%
 
 
 function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
@@ -452,11 +494,13 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     end
 end
 
-function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpace)
+function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
     if strcmp(breakType, 'equal')
         Breaks = 1 : totalpoints/loops : totalpoints;
 
     elseif strcmp(breakType, 'random')
+        %tbh I found this on stackpverflow and have no idea how it works
+        %lol
         E = totalpoints-(loops-1)*minSpace;
 
         ro = rand(loops+1,1);
