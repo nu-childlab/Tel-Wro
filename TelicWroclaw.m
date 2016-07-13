@@ -215,10 +215,8 @@ for condition = blockList
         numberOfLoops = trial(1);
         totaltime = anticorrelated_values(numberOfLoops);
         if strcmp(correlation_list{x}, 'corr')
-            disp('test corr')
             totaltime = correlated_values(numberOfLoops);
         end
-        disp('test1')
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
 
@@ -226,16 +224,13 @@ for condition = blockList
             minSpace, scale, xCenter, yCenter, window, ...
             pauseTime, breakType, breakTime, screenNumber, starTexture, ...
             ifi, vbl)
-        disp('test2')
         numberOfLoops = trial(2);
         totaltime = anticorrelated_values(numberOfLoops);
         if strcmp(correlation_list{x}, 'corr')
-            disp('test corr')
             totaltime = correlated_values(numberOfLoops);
         end
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
-        disp('test3')
 
         animateEventLoops(numberOfLoops, framesPerLoop, ...
             minSpace, scale, xCenter, yCenter, window, ...
@@ -264,12 +259,9 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     white = WhiteIndex(screenNumber);
     black = BlackIndex(screenNumber);
     grey = white/2;
-    disp('test01')
     [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
     totalpoints = numel(xpoints);
-    disp('test000')
     Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
-    disp('test02')
     xpoints = (xpoints .* scale) + xCenter;
     ypoints = (ypoints .* scale) + yCenter;
     %points = [xpoints ypoints];
@@ -417,7 +409,7 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %smoothframes designates a few frames to smooth this out. It uses fewer
     %frames for the ellipse, and instead spends a few frames going from the
     %end of the ellipse to the origin.
-    smoothframes = 3;
+    smoothframes = 5;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
@@ -429,8 +421,6 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %This is to it doesn't make a complete circle, which would have two
     %overlapping ellipses.
     orientation = linspace(0,360-round(360/numberOfLoops),numberOfLoops);
-
-    disp('test12')
     for i = 1:numberOfLoops
         %orientation calculated from above
         loopOri=orientation(i)*pi/180;
@@ -460,37 +450,26 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         xpoints = [xpoints x3];
         ypoints = [ypoints y3];
     end
-    disp(xpoints(26))
 end
 
 function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpace)
-    disp('breaks1')
     if strcmp(breakType, 'equal')
         Breaks = 1 : totalpoints/loops : totalpoints;
 
     elseif strcmp(breakType, 'random')
-        Breaks = randi([1 (loops*loopFrames)], 1, loops-1);
-        disp('breaksrandom')
-        x = 1;
-        y = 2;
-        while x <= numel(Breaks)
-            while y <= numel(Breaks)
-                if x ~= y && abs(Breaks(x) - Breaks(y)) < minSpace || Breaks(x) < minSpace ||...
-                        (loops*loopFrames) - Breaks(x) < minSpace
-                    Breaks(x) =  randi([1, (loops*loopFrames)], 1, 1);
-                    disp('minspace error')
-                    x = 1;
-                    y = 1;
-                end
-                y = y + 1;
-            end
-            x = x + 1;
-            y = 1;
-        end
-        disp('breaks2')
+        E = totalpoints-(loops-1)*minSpace;
+
+        ro = rand(loops+1,1);
+        rn = E*ro(1:loops)/sum(ro);
+
+        s = minSpace*ones(loops,1)+rn;
+
+        Breaks=cumsum(s)-1;
+        
+        Breaks = reshape(Breaks, 1, length(Breaks));
+        Breaks = arrayfun(@(x) round(x),Breaks);
 
     else
         Breaks = [];
     end
-    disp('breaksend')
 end
