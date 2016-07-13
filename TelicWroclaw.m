@@ -26,7 +26,6 @@ grey = white/2;
 
 %%%Screen Stuff
 
-PsychDebugWindowConfiguration(-1, .5) %opacity
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
 %opens a window in the most external screen and colors it)
 Screen('BlendFunction', window, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -68,15 +67,10 @@ squote = ' ''';
 %LISTS
 %%%%%%
 
-correlation_list = {'corr' 'corr' 'corr' 'corr' 'corr' 'corr' 'corr' 'corr' ...
-    'corr' 'corr' 'anti' 'anti' 'anti' 'anti' 'anti' 'anti' 'anti' 'anti' ...
-    'anti' 'anti'};
-
 list = 'test';
 if strcmp(list, 'test')
     trial_list = {[4 5; 5 4;]; [9 7; 7 9]; [6 8; 8 6];};
     trial_list = [trial_list;trial_list];
-    correlation_list = {'corr' 'corr' 'corr' 'anti' 'anti' 'anti'};
 elseif strcmp(list, 'blue')
     trial_list = {[4 5; 5 4;]; [4 6; 6 4]; [4 7; 7 4]; [4 8; 8 4]; [4 9; 9 4]; ...
         [9 4; 4 9]; [9 5; 5 9]; [9 6; 6 9]; [9 7; 7 9]; [9 8; 8 9]};
@@ -101,8 +95,11 @@ end
 
 shuff = randperm(length(trial_list));
 trial_list = trial_list(shuff,:);
-correlation_list = correlation_list(shuff);
 
+
+%%%%%%
+%THE ACTUAL FUNCTION!!!
+%%%%%%
 
 %%%%%%%Screen Prep
 HideCursor;	% Hide the mouse cursor
@@ -151,9 +148,6 @@ scale = screenYpixels / 10;%previously 15
 vbl = Screen('Flip', window);
 
 %%%%%%DATA FILES
-
-dataFile = fopen('TELICZData.csv', 'a');
-fprintf(dataFile, '%s\n', '')
 
 
 %%%%%Conditions and List Setup
@@ -209,46 +203,13 @@ for condition = blockList
 
     %%%%%%RUNNING
     
-    for x = 1:1
-        fprintf(dataFile, '%d///', numel(trial_list))
-        trial = trial_list{x};
-        trial = trial(randi([1, 2], 1, 1), :);
-        fprintf(dataFile, '%d  %d,', trial(1), trial(2))
+    for trial = trial_list
 
-        numberOfLoops = 7;%trial(1);
-%         if strcmp(correlation_list{x}, 'corr')
-%             totaltime = correlated_values(numberOfLoops);
-%         else
-            totaltime = anticorrelated_values(numberOfLoops);
-%         end
-        fprintf(dataFile, '%s,', correlation_list{x})
-        loopTime = totaltime/numberOfLoops;
-        fprintf(dataFile, '%d,', loopTime)
-        framesPerLoop = round(loopTime / ifi) + 1;
-%         if framesPerLoop < 40
-%             fprintf(dataFile, '%s,', 'CHANGED');
-%             framesPerLoop = 40;
-%         end
-        fprintf(dataFile, '%d,', framesPerLoop)
-
-        animateEventLoops(numberOfLoops, framesPerLoop, ...
-            minSpace, scale, xCenter, yCenter, window, ...
-            pauseTime, breakType, breakTime, screenNumber, starTexture, ...
-            ifi, vbl)
-        
-
-        numberOfLoops = 9;%trial(2);
-%         if strcmp(correlation_list(x), 'corr')
-%             totaltime = correlated_values(numberOfLoops);
-%         else
-            totaltime = anticorrelated_values(numberOfLoops);
-%         end
+        numberOfLoops = 6;
+        breakType = 'equal';
+        totaltime = anticorrelated_values(numberOfLoops);
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
-%         if framesPerLoop < 40
-%             fprintf(dataFile, '%s,', 'CHANGED');
-%             framesPerLoop = 40;
-%         end
 
         animateEventLoops(numberOfLoops, framesPerLoop, ...
             minSpace, scale, xCenter, yCenter, window, ...
@@ -428,7 +389,7 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %smoothframes designates a few frames to smooth this out. It uses fewer
     %frames for the ellipse, and instead spends a few frames going from the
     %end of the ellipse to the origin.
-    smoothframes = 5;
+    smoothframes = 3;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
