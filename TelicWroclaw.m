@@ -210,11 +210,14 @@ for condition = blockList
     %%%%%%RUNNING
      
     for x = 1:length(trial_list)
-%     for x = 4:9
         trial = trial_list{x};
         trial = trial(randi([1,2]),:);
         numberOfLoops = trial(1);
-        totaltime = correlated_values(numberOfLoops);
+        totaltime = anticorrelated_values(numberOfLoops);
+        if strcmp(correlation_list{x}, 'corr')
+            disp('test corr')
+            totaltime = correlated_values(numberOfLoops);
+        end
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
 
@@ -406,7 +409,7 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %smoothframes designates a few frames to smooth this out. It uses fewer
     %frames for the ellipse, and instead spends a few frames going from the
     %end of the ellipse to the origin.
-    smoothframes = 3;
+    smoothframes = 5;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
