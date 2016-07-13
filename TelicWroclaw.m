@@ -15,7 +15,8 @@ screenNumber = max(screens);
 rng('shuffle');
 KbName('UnifyKeyNames');
 
-
+subj = 's999';
+list = 'test';
 
 %%%%%%%%
 %COLOR PARAMETERS
@@ -71,7 +72,6 @@ correlation_list = {'corr';'corr';'corr';'corr';'corr';'corr';'corr';...
     'corr';'corr';'corr';'anti';'anti';'anti';'anti';'anti';'anti';...
     'anti';'anti';'anti';'anti'};
 
-list = 'test';
 if strcmp(list, 'test')
     trial_list = {[4 5; 5 4;]; [9 7; 7 9]};
     trial_list = [trial_list;trial_list];
@@ -158,14 +158,12 @@ end
 dataFile = fopen('~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclawdata.csv', 'a');
 subjFile = fopen(['~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclaw' subj '.csv'],'a');
 if initprint
-    fprintf(dataFile, ['subj,time,cond,break,list,trial1,trial2,contrast,response\n']);
+    fprintf(dataFile, ['subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n']);
 end
-fprintf(subjFile, 'subj,time,cond,break,list,trial1,trial2,contrast,response\n');
-lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%d\n';
+fprintf(subjFile, 'subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n');
+lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,$6.2f,%6.2f,%s\n';
 
 %%%%%Conditions and List Setup
-
-%Format is [number_of_loops total_animation_time]
 
 blockList = {'mass'}; %'count'};
 keys = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -176,8 +174,10 @@ anticorrelated_values = [9, 8.25, 7.5, 6.75, 6, 5.25, 4.5, 3.75, 3];
 for condition = blockList
     if strcmp(condition,'mass')
         breakType = 'random';
+        cond = 'mass';
     else
         breakType='equal';
+        cond = 'count';
     end
 
 
@@ -223,11 +223,11 @@ for condition = blockList
         trial = trial_list{x};
         trial = trial(randi([1,2]),:);
         numberOfLoops = trial(1);
-        totaltime = anticorrelated_values(numberOfLoops);
+        startotaltime = anticorrelated_values(numberOfLoops);
         if strcmp(correlation_list{x}, 'corr')
-            totaltime = correlated_values(numberOfLoops);
+            startotaltime = correlated_values(numberOfLoops);
         end
-        loopTime = totaltime/numberOfLoops;
+        loopTime = startotaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
 
         animateEventLoops(numberOfLoops, framesPerLoop, ...
@@ -237,11 +237,11 @@ for condition = blockList
         
         %second animation, with heart
         numberOfLoops = trial(2);
-        totaltime = anticorrelated_values(numberOfLoops);
+        hearttotaltime = anticorrelated_values(numberOfLoops);
         if strcmp(correlation_list{x}, 'corr')
-            totaltime = correlated_values(numberOfLoops);
+            hearttotaltime = correlated_values(numberOfLoops);
         end
-        loopTime = totaltime/numberOfLoops;
+        loopTime = hearttotaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
 
         animateEventLoops(numberOfLoops, framesPerLoop, ...
@@ -250,10 +250,10 @@ for condition = blockList
             ifi, vbl)
         
         [response, time] = getResponse(window, breakType, textsize, screenYpixels);
-        fprintf(subjFile, 'subj,time,cond,break,list,trial1,trial2,contrast,response\n');
-        lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%d\n';
-        fprintf(dataFile, lineFormat, subj, time*1000, condition, breakType, list, trial(1),...
-            compareLoops(2), abs(compareLoops(1) - compareLoops(2)), str2double(response));
+        fprintf(dataFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
+            trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
+        fprintf(subjFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
+            trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
     end
 
 
