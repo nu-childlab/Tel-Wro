@@ -67,15 +67,12 @@ squote = ' ''';
 %LISTS
 %%%%%%
 
-correlation_list = {'corr';'corr';'corr';'corr';'corr';'corr';'corr';...
-    'corr';'corr';'corr';'anti';'anti';'anti';'anti';'anti';'anti';...
-    'anti';'anti';'anti';'anti'};
+correlati
 
 list = 'test';
 if strcmp(list, 'test')
     trial_list = {[4 5; 5 4;]; [9 7; 7 9]; [6 8; 8 6];};
     trial_list = [trial_list;trial_list];
-    correlation_list = {'corr';'corr';'corr';'anti';'anti';'anti'};
 elseif strcmp(list, 'blue')
     trial_list = {[4 5; 5 4;]; [4 6; 6 4]; [4 7; 7 4]; [4 8; 8 4]; [4 9; 9 4]; ...
         [9 4; 4 9]; [9 5; 5 9]; [9 6; 6 9]; [9 7; 7 9]; [9 8; 8 9]};
@@ -100,7 +97,6 @@ end
 
 shuff = randperm(length(trial_list));
 trial_list = trial_list(shuff,:);
-correlation_list = correlation_list(shuff);
 
 
 %%%%%%
