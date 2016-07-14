@@ -181,7 +181,7 @@ anticorrelated_values = [9, 8.25, 7.5, 6.75, 6, 5.25, 4.5, 3.75, 3];
 %%%%%%RUNNING
 
 instructions(window, screenXpixels, screenYpixels, textsize, textspace)
-
+c = 1;
 
 for condition = blockList
     if strcmp(condition,'mass')
@@ -194,34 +194,35 @@ for condition = blockList
 
 
     %%%%%%TRAINING
-    % numberOfLoops = 1;
-    % loopTime = 1;
-    % totaltime =
-    % framesPerLoop = round(loopTime / ifi) + 1;
+    numberOfLoops = 1;
+    totaltime = correlated_values(numberOfLoops);
+    loopTime = totaltime/numberOfLoops;
+    framesPerLoop = round(loopTime / ifi) + 1;
 
-    % trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
-    % animateEventLoops(numberOfLoops, framesPerLoop, ...
-    %     minSpace, scale, xCenter, yCenter, window, ...
-    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-    %     ifi, vbl)
-    % 
-    % trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
-    % numberOfLoops = 2;
-    % loopTime = 1;
-    % framesPerLoop = round(loopTime / ifi) + 1;
-    % animateEventLoops(numberOfLoops, framesPerLoop, ...
-    %     minSpace, scale, xCenter, yCenter, window, ...
-    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-    %     ifi, vbl)
-    % 
-    % trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
-    % numberOfLoops = 3;
-    % loopTime = 1;
-    % framesPerLoop = round(loopTime / ifi) + 1;
-    % animateEventLoops(numberOfLoops, framesPerLoop, ...
-    %     minSpace, scale, xCenter, yCenter, window, ...
-    %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-    %     ifi, vbl)
+    trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
+    animateEventLoops(numberOfLoops, framesPerLoop, ...
+        minSpace, scale, xCenter, yCenter, window, ...
+        pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+        ifi, vbl)
+    
+    trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
+    numberOfLoops = 2;
+    totaltime = correlated_values(numberOfLoops);
+    loopTime = totaltime/numberOfLoops;
+    framesPerLoop = round(loopTime / ifi) + 1;
+    animateEventLoops(numberOfLoops, framesPerLoop, ...
+        minSpace, scale, xCenter, yCenter, window, ...
+        pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+        ifi, vbl)
+    
+    trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
+    totaltime = anticorrelated_values(numberOfLoops);
+    loopTime = totaltime/numberOfLoops;
+    framesPerLoop = round(loopTime / ifi) + 1;
+    animateEventLoops(numberOfLoops, framesPerLoop, ...
+        minSpace, scale, xCenter, yCenter, window, ...
+        pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+        ifi, vbl)
 
     testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
@@ -267,15 +268,18 @@ for condition = blockList
             pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
             ifi, vbl)
         
-        %[response, time] = getResponse(window, breakType, textsize, screenYpixels);
-        response = 'na';
-        time = 0;
+        [response, time] = getResponse(window, breakType, textsize, screenYpixels);
+%         response = 'na';
+%         time = 0;
         fprintf(dataFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
             trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
         fprintf(subjFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
             trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
     end
-
+    if c
+        breakScreen(window, textsize, textspace);
+    end
+    c = c-1;
 
 end %ending the block
 %%%%%%Finishing and exiting
@@ -339,7 +343,7 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     WaitSecs(pauseTime);
 end
 
-%%%%%%INSTRUCTIONS AND FINISH FUNCTION%%%%%%%%%
+%%%%%%INSTRUCTIONS, BREAK, AND FINISH FUNCTION%%%%%%%%%
 function [] = instructions(window, screenXpixels, screenYpixels, textsize, textspace)
     Screen('TextFont',window,'Arial');
     Screen('TextSize',window,textsize);
@@ -369,6 +373,24 @@ function [] = instructions(window, screenXpixels, screenYpixels, textsize, texts
     Screen('Flip', window);
     RestrictKeysForKbCheck([]);
 
+end
+
+function [] = breakScreen(window, textsize, textspace)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    textcolor = white;
+    quote = '''';
+    DrawFormattedText(window, ['That' quote 's it for that block! \n\n' ...
+        ' Please press the spacebar when you are ready to continue to the next block. '], 'center', 'center',...
+        textcolor, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    % Wait for keypress
+    RestrictKeysForKbCheck(KbName('space'));
+    KbStrokeWait;
+    Screen('Flip', window);
+    RestrictKeysForKbCheck([]);
 end
 
 function [] = finish(window, textsize, textspace)
@@ -539,7 +561,8 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %smoothframes designates a few frames to smooth this out. It uses fewer
     %frames for the ellipse, and instead spends a few frames going from the
     %end of the ellipse to the origin.
-    smoothframes = 3;
+    smoothframes = 0;
+    doublesmooth = smoothframes*2;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
@@ -573,8 +596,8 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         %It also adds in some extra frames to smooth the transition between
         %ellipses
         start = round((numberOfFrames-smoothframes)/4);
-        x3 = [x2(start:numberOfFrames-smoothframes) x2(1:start) linspace(x2(start),0,smoothframes)];
-        y3 = [y2(start:numberOfFrames-smoothframes) y2(1:start) linspace(x2(start),0,smoothframes)];
+        x3 = [x2(start:numberOfFrames-smoothframes) x2(2:start) linspace(x2(start),0,smoothframes)];
+        y3 = [y2(start:numberOfFrames-smoothframes) y2(2:start) linspace(y2(start),0,smoothframes)];
         %Finally, accumulate the points in full points arrays for easy graphing
         %and drawing
         xpoints = [xpoints x3];
@@ -625,7 +648,7 @@ function [subj] = subjcheck(subj)
         if ~any(subj(x) == numstrs)
             subj = input(['Subject ID ' subj ' is invalid. It should ' ...
                 'consist of an "s" followed by only numbers. Please use a ' ...
-                'different ID:'], 's');
+                'different ID: '], 's');
             subj = subjcheck(subj);
             return
         end
@@ -647,13 +670,13 @@ end
 
 function [cond] = condcheck(cond)
     while ~strcmp(cond, 'm') && ~strcmp(cond, 'c')
-        cond = input('Condition must be m or c. Please enter m (mass) or q (count):', 's');
+        cond = input('Condition must be m or c. Please enter m (mass) or q (count): ', 's');
     end
 end
 
 function [list] = listcheck(list)
     if strcmp(list, 'test')
-        check = input('Type y to continue using a test list. Type anything else to abort the program', 's');
+        check = input('Type y to continue using a test list. Type anything else to abort the program: ', 's');
         if strcmp(check, 'y')
             return
         else
@@ -661,6 +684,6 @@ function [list] = listcheck(list)
         end
     end
     while ~strcmp(list, 'blue') && ~strcmp(list, 'pink') && ~strcmp(list, 'green') && ~strcmp(list, 'orange') && ~strcmp(list, 'yellow')
-        list = input('List must be a valid color. Please enter blue, pink, green, orange, or yellow:', 's');
+        list = input('List must be a valid color. Please enter blue, pink, green, orange, or yellow: ', 's');
     end
 end
