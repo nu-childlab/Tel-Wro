@@ -1,5 +1,2 @@
 # Tel-Wro
-Still in-progress
-
-# Things to Implement
-~Fix wonky data writing
+Done! Ready for reviewing!
