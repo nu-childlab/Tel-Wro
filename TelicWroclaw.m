@@ -15,7 +15,12 @@ screenNumber = max(screens);
 rng('shuffle');
 KbName('UnifyKeyNames');
 
-
+cond=input('Condition m or c: ', 's');
+cond = condcheck(cond);
+subj=input('Subject Number: ', 's');
+subj = subjcheck(subj);
+list=input('List color: ', 's');
+list = listcheck(list);
 
 %%%%%%%%
 %COLOR PARAMETERS
@@ -55,7 +60,7 @@ crossTime = 1;
 pauseTime = .5;
 %Length of space between loops presentation
 
-textsize = 36;
+textsize = 40;
 textspace = 1.5;
 
 %Matlab's strings are stupid, so I have quotes and quotes with spaces in
@@ -64,8 +69,43 @@ quote = '''';
 squote = ' ''';
 
 %%%%%%
-%THE ACTUAL FUNCTION!!!
+%LISTS
 %%%%%%
+
+correlation_list = {'corr';'corr';'corr';'corr';'corr';'corr';'corr';...
+    'corr';'corr';'corr';'anti';'anti';'anti';'anti';'anti';'anti';...
+    'anti';'anti';'anti';'anti'};
+
+if strcmp(list, 'test')
+    trial_list = {[4 5; 5 4;]; [9 7; 7 9]};
+    trial_list = [trial_list;trial_list];
+    correlation_list = {'corr';'corr';'anti';'anti'};
+elseif strcmp(list, 'blue')
+    trial_list = {[4 5; 5 4;]; [4 6; 6 4]; [4 7; 7 4]; [4 8; 8 4]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [9 5; 5 9]; [9 6; 6 9]; [9 7; 7 9]; [9 8; 8 9]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'pink')
+    trial_list = {[5 6; 6 5]; [5 7; 7 5]; [5 8; 8 5]; [5 9; 9 5]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [8 4; 4 8]; [8 5; 5 8]; [8 6; 6 8]; [8 7; 7 8]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'green')
+    trial_list = {[6 7; 7 6]; [6 8; 8 6]; [6 9; 9 6]; [5 9; 9 5]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [8 4; 4 8]; [7 4; 4 7]; [7 5; 5 7]; [7 6; 6 7]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'orange')
+    trial_list = {[7 8; 8 7]; [6 8; 8 6]; [5 8; 8 5]; [4 8; 8 4]; [4 9; 9 4]; ...
+        [9 4; 4 9]; [9 5; 5 9]; [8 5; 5 8]; [7 5; 5 7]; [6 5; 5 6]};
+    trial_list = [trial_list;trial_list];
+elseif strcmp(list, 'yellow')
+    trial_list = {[4 9; 9 4]; [5 9; 9 5]; [6 9; 9 6]; [7 9; 9 7]; [8 9; 9 8]; ...
+        [5 4; 4 5]; [6 4; 4 6]; [7 4; 4 7]; [8 4; 4 8]; [9 4; 4 9]};
+    trial_list = [trial_list;trial_list];
+end
+
+shuff = randperm(length(trial_list));
+trial_list = trial_list(shuff,:);
+correlation_list = correlation_list(shuff);
+
 
 %%%%%%%Screen Prep
 HideCursor;	% Hide the mouse cursor
@@ -115,28 +155,45 @@ vbl = Screen('Flip', window);
 
 %%%%%%DATA FILES
 
+initprint = 0;
+if ~(exist('~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclawdata.csv', 'file') == 2)
+    initprint = 1;
+end
+dataFile = fopen('~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclawdata.csv', 'a');
+subjFile = fopen(['~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclaw' subj '.csv'],'a');
+if initprint
+    fprintf(dataFile, ['subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n']);
+end
+fprintf(subjFile, 'subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n');
+lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,$6.2f,%6.2f,%s\n';
 
 %%%%%Conditions and List Setup
 
-%Format is [number_of_loops total_animation_time]
+if strcmp(cond,'m')
+    blockList = {'mass', 'count'};
+else
+    blockList = {'count', 'mass'};
+end
 
-blockList = {'mass'}; %'count'};
-keys = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 correlated_values = [.75, 1.5, 2.25, 3, 3.75, 4.5, 5.25, 6, 6.75];
 anticorrelated_values = [9, 8.25, 7.5, 6.75, 6, 5.25, 4.5, 3.75, 3];
 
 %%%%%%RUNNING
+
+instructions(window, screenXpixels, screenYpixels, textsize, textspace)
+
+
 for condition = blockList
     if strcmp(condition,'mass')
         breakType = 'random';
+        cond = 'mass';
     else
         breakType='equal';
+        cond = 'count';
     end
 
 
     %%%%%%TRAINING
-
-    % breakType = 'equal';
     % numberOfLoops = 1;
     % loopTime = 1;
     % totaltime =
@@ -166,22 +223,64 @@ for condition = blockList
     %     pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
     %     ifi, vbl)
 
+    testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
     %%%%%%RUNNING
-    numberOfLoops = 6;
-    breakType = 'equal';
-    totaltime = anticorrelated_values(numberOfLoops);
-    loopTime = totaltime/numberOfLoops;
-    framesPerLoop = round(loopTime / ifi) + 1;
+    
+    
+     
+    for x = 1:length(trial_list)
+        
+        %fixation cross
+        fixCross(xCenter, yCenter, black, window, crossTime)
+        
+        %first animation, with star
+        trial = trial_list{x};
+        trial = trial(randi([1,2]),:);
+        numberOfLoops = trial(1);
+        startotaltime = anticorrelated_values(numberOfLoops);
+        if strcmp(correlation_list{x}, 'corr')
+            startotaltime = correlated_values(numberOfLoops);
+        end
+        loopTime = startotaltime/numberOfLoops;
+        framesPerLoop = round(loopTime / ifi) + 1;
 
-    animateEventLoops(numberOfLoops, framesPerLoop, ...
-        minSpace, scale, xCenter, yCenter, window, ...
-        pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
-        ifi, vbl)
+        animateEventLoops(numberOfLoops, framesPerLoop, ...
+            minSpace, scale, xCenter, yCenter, window, ...
+            pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+            ifi, vbl)
+        
+        %fixation cross
+        fixCross(xCenter, yCenter, black, window, crossTime)
+        
+        %second animation, with heart
+        numberOfLoops = trial(2);
+        hearttotaltime = anticorrelated_values(numberOfLoops);
+        if strcmp(correlation_list{x}, 'corr')
+            hearttotaltime = correlated_values(numberOfLoops);
+        end
+        loopTime = hearttotaltime/numberOfLoops;
+        framesPerLoop = round(loopTime / ifi) + 1;
+
+        animateEventLoops(numberOfLoops, framesPerLoop, ...
+            minSpace, scale, xCenter, yCenter, window, ...
+            pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
+            ifi, vbl)
+        
+        %[response, time] = getResponse(window, breakType, textsize, screenYpixels);
+        response = 'na';
+        time = 0;
+        fprintf(dataFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
+            trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
+        fprintf(subjFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
+            trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
+    end
 
 
 end %ending the block
 %%%%%%Finishing and exiting
+
+finish(window, textsize, textspace)
 sca
 Priority(0);
 end
@@ -191,7 +290,14 @@ end
 
 
 
-%%%%%START/FINISH/BREAK FUNCTIONS%%%%%
+
+
+
+
+
+
+
+%%%%%ANIMATION FUNCTION%%%%%
 
 function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
@@ -202,11 +308,10 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     grey = white/2;
     [xpoints, ypoints] = getPoints(numberOfLoops, framesPerLoop);
     totalpoints = numel(xpoints);
-    Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, framesPerLoop, minSpace);
+    Breaks = makeBreaks(breakType, totalpoints, numberOfLoops, minSpace);
     xpoints = (xpoints .* scale) + xCenter;
     ypoints = (ypoints .* scale) + yCenter;
     %points = [xpoints ypoints];
-    
     pt = 1;
     waitframes = 1;
     Screen('FillRect', window, grey);
@@ -234,45 +339,94 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     WaitSecs(pauseTime);
 end
 
-
-
-
-%%%%%%RESPONSE FUNCTION%%%%%
-
-function [response, time] = getResponse(window, screenXpixels, screenYpixels, textsize, testq)
+%%%%%%INSTRUCTIONS AND FINISH FUNCTION%%%%%%%%%
+function [] = instructions(window, screenXpixels, screenYpixels, textsize, textspace)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize);
     black = BlackIndex(window);
     white = WhiteIndex(window);
     textcolor = white;
     xedgeDist = floor(screenXpixels / 3);
-    numstep = floor(linspace(xedgeDist, screenXpixels - xedgeDist, 7));
+    quote = '''';
+    intro = ['Welcome to the experiment. In this experiment, you will be asked to answer',...
+        ' questions relative to short animations. There are 2 blocks in the experiment,',...
+        ' and each block contains 20 trials. In each block, you will be asked to evaluate',...
+        ' a different question. You will be given a short break between blocks. \n\n',...
+        ' For each animation, you will indicate whether the sentence accurately describes',...
+        ' that animation by pressing ' quote 'f' quote ' for YES or ' quote 'j' quote ' for NO.',...
+        ' You will be reminded of these response keys throughout. '];
+    
+    DrawFormattedText(window, intro, 'center', screenYpixels/7, textcolor, 70, 0, 0, textspace);
+    
+    intro2 = ['The experiment will proceed in two main parts. Please indicate to the experimenter if you have any questions, '...
+        'or are ready to begin the experiment. \n\n When the experimenter has '...
+        'left the room, you may press spacebar to begin.'];
+    
+    DrawFormattedText(window, intro2, 'center', 2*screenYpixels/3, textcolor, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    RestrictKeysForKbCheck(KbName('space'));
+    KbStrokeWait;
+    Screen('Flip', window);
+    RestrictKeysForKbCheck([]);
+
+end
+
+function [] = finish(window, textsize, textspace)
     Screen('TextFont',window,'Arial');
     Screen('TextSize',window,textsize);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    textcolor = white;
+    closing = ['Thank you for your participation.\n\nPlease let the ' ...
+        'experimenter know that you are finished.'];
+    DrawFormattedText(window, closing, 'center', 'center', textcolor, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    % Wait for keypress
+    RestrictKeysForKbCheck(KbName('ESCAPE'));
+    KbStrokeWait;
+    Screen('Flip', window);
+end
 
-    DrawFormattedText(window, testq, 'center', screenYpixels/3, textcolor, 70);
-    for x = 1:7
-        DrawFormattedText(window, int2str(x), numstep(x), 'center', textcolor, 70);
+
+%%%%%%RESPONSE FUNCTION%%%%%
+
+function [response, time] = getResponse(window, breakType, textsize, screenYpixels)
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    textcolor = white;
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize+6);
+    quote = '''';
+    if strcmp(breakType, 'random')
+        verb = 'gleeb';
+    else
+        verb = 'blick';
     end
-    DrawFormattedText(window, '  not  \n at all \nsimilar', numstep(1) - (xedgeDist / 25),...
-        screenYpixels/2 + 30, textcolor);
-    DrawFormattedText(window, 'very \nsimilar', numstep(7) - (xedgeDist / 25), screenYpixels/2 + 30, textcolor);
+    DrawFormattedText(window, ['Did the star ' verb ' more than the heart?'],...
+        'center', 'center', textcolor, 70, 0, 0, 1.5);
+    Screen('TextSize',window,textsize);
+    DrawFormattedText(window, ['Press ' quote 'f' quote ' for YES and ' quote 'j' quote ' for NO'],...
+        'center', screenYpixels/2 + 80, textcolor, 70);
     Screen('Flip',window);
 
     % Wait for the user to input something meaningful
     inLoop=true;
-    oneseven = [KbName('1!') KbName('2@') KbName('3#') KbName('4$')...
-        KbName('5%') KbName('6^') KbName('7&')];
-%     numkeys = [89 90 91 92 93 94 95];
+    %response = '-1';
+    yesno = [KbName('f') KbName('j')];
     starttime = GetSecs;
     while inLoop
-        response = 0;
+        %code = [];
         [keyIsDown, ~, keyCode]=KbCheck;
         if keyIsDown
             code = find(keyCode);
-            if any(code(1) == oneseven)
+            if any(code(1) == yesno)
                 endtime = GetSecs;
-                response = KbName(code);
-                response = response(1);
-                if response
+                if code == 9
+                    response = 'f';
+                    inLoop=false;
+                end
+                if code== 13
+                    response= 'j';
                     inLoop=false;
                 end
             end
@@ -287,6 +441,8 @@ end
 %%%%%%FIXATION CROSS FUNCTION%%%%%
 
 function[] = fixCross(xCenter, yCenter, black, window, crossTime)
+    white = WhiteIndex(window);
+    Screen('FillRect', window, white/2);
     fixCrossDimPix = 40;
     xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
     yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
@@ -299,7 +455,7 @@ function[] = fixCross(xCenter, yCenter, black, window, crossTime)
 end
 
 
-%%%%%TRAINING FUNCTIONS%%%%%
+%%%%%SENTENCE/INSTRUCTIONS FUNCTIONS%%%%%
 
 function [] = trainSentence(window, textsize, textspace, phase, breakType, screenYpixels)
     Screen('TextFont',window,'Arial');
@@ -343,7 +499,39 @@ function [] = trainSentence(window, textsize, textspace, phase, breakType, scree
     RestrictKeysForKbCheck([]);
 end
 
-%%%%%STIMULUS MATH FUNCTIONS%%%%%
+function [] = testingSentence(window, textsize, textspace, breakType, screenYpixels)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    Screen('FillRect', window, black);
+    Screen('Flip', window);
+    quote = '''';
+    if strcmp(breakType, 'random')
+        verb = 'gleeb';
+    else
+        verb = 'blick';
+    end
+    
+    DrawFormattedText(window, ['Now you' quote 're going to see pairs of '...
+        'videos, involving the star and a heart. For each pair, you are '...
+        'going to be asked:'], 'center', screenYpixels/2-(screenYpixels/5), white, 70, 0, 0, textspace);
+    
+    Screen('TextSize',window,textsize+15);
+    DrawFormattedText(window, ['Did the star ' verb ' more than the heart?'],...
+                'center', 'center', white, 70, 0, 0, textspace);
+    Screen('TextSize',window,textsize);
+    DrawFormattedText(window, 'Ready? Press spacebar.', 'center', ...
+        screenYpixels/2+(screenYpixels/5), white, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    % Wait for keypress
+    RestrictKeysForKbCheck(KbName('space'));
+    KbStrokeWait;
+    Screen('Flip', window);
+    RestrictKeysForKbCheck([]);
+end
+
+%%%%%POINTS AND BREAKS FUNCTIONS%%%%%
 
 
 function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
@@ -363,8 +551,6 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %This is to it doesn't make a complete circle, which would have two
     %overlapping ellipses.
     orientation = linspace(0,360-round(360/numberOfLoops),numberOfLoops);
-
-
     for i = 1:numberOfLoops
         %orientation calculated from above
         loopOri=orientation(i)*pi/180;
@@ -376,7 +562,6 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         %Then rotate it
         x = (initx-centerX)*cos(loopOri) - (inity-centerY)*sin(loopOri) + centerX;
         y = (initx-centerX)*sin(loopOri) + (inity-centerY)*cos(loopOri) + centerY;
-
         %then push it out based on the rotation
         for m = 1:numel(x)
             x2(m) = x(m) + (x(round(numel(x)*.75)) *1);
@@ -390,7 +575,6 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
         start = round((numberOfFrames-smoothframes)/4);
         x3 = [x2(start:numberOfFrames-smoothframes) x2(1:start) linspace(x2(start),0,smoothframes)];
         y3 = [y2(start:numberOfFrames-smoothframes) y2(1:start) linspace(x2(start),0,smoothframes)];
-
         %Finally, accumulate the points in full points arrays for easy graphing
         %and drawing
         xpoints = [xpoints x3];
@@ -398,29 +582,85 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     end
 end
 
-function [Breaks] = makeBreaks(breakType, totalpoints, loops, loopFrames, minSpace)
+function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
     if strcmp(breakType, 'equal')
         Breaks = 1 : totalpoints/loops : totalpoints;
 
     elseif strcmp(breakType, 'random')
-        Breaks = randi([1 (loops*loopFrames)], 1, loops-1);
-        x = 1;
-        y = 2;
-        while x <= numel(Breaks)
-            while y <= numel(Breaks)
-                if x ~= y && abs(Breaks(x) - Breaks(y)) < minSpace || Breaks(x) < minSpace ||...
-                        (loops*loopFrames) - Breaks(x) < minSpace
-                    Breaks(x) =  randi([1, (loops*loopFrames)], 1, 1);
-                    x = 1;
-                    y = 0;
-                end
-                y = y + 1;
-            end
-            x = x + 1;
-            y = 1;
-        end
+        %tbh I found this on stackpverflow and have no idea how it works
+        %lol
+        E = totalpoints-(loops-1)*minSpace;
+
+        ro = rand(loops+1,1);
+        rn = E*ro(1:loops)/sum(ro);
+
+        s = minSpace*ones(loops,1)+rn;
+
+        Breaks=cumsum(s)-1;
+        
+        Breaks = reshape(Breaks, 1, length(Breaks));
+        Breaks = arrayfun(@(x) round(x),Breaks);
 
     else
         Breaks = [];
+    end
+end
+
+%%%%%%%%%
+%INPUT CHECKING FUNCTIONS
+%%%%%%%%%
+
+function [subj] = subjcheck(subj)
+    if ~strncmpi(subj, 's', 1)
+        %forgotten s
+        subj = ['s', subj];
+    end
+    if strcmp(subj,'s')
+        subj = input(['Please enter a subject ' ...
+                'ID:'], 's');
+        subj = subjcheck(subj);
+    end
+    numstrs = ['1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0'];
+    for x = 2:numel(subj)
+        if ~any(subj(x) == numstrs)
+            subj = input(['Subject ID ' subj ' is invalid. It should ' ...
+                'consist of an "s" followed by only numbers. Please use a ' ...
+                'different ID:'], 's');
+            subj = subjcheck(subj);
+            return
+        end
+    end
+    if (exist(['~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclaw' subj '.csv'], 'file') == 2) && ~strcmp(subj, 's999')...
+            && ~strcmp(subj,'s998')
+        temp = input(['Subject ID ' subj ' is already in use. Press y '...
+            'to continue writing to this file, or press '...
+            'anything else to try a new ID: '], 's');
+        if strcmp(temp,'y')
+            return
+        else
+            subj = input(['Please enter a new subject ' ...
+                'ID:'], 's');
+            subj = subjcheck(subj);
+        end
+    end
+end
+
+function [cond] = condcheck(cond)
+    while ~strcmp(cond, 'm') && ~strcmp(cond, 'c')
+        cond = input('Condition must be m or c. Please enter m (mass) or q (count):', 's');
+    end
+end
+
+function [list] = listcheck(list)
+    if strcmp(list, 'test')
+        check = input('Type y to continue using a test list. Type anything else to abort the program', 's');
+        if strcmp(check, 'y')
+            return
+        else
+            error('Process aborted')
+        end
+    end
+    while ~strcmp(list, 'blue') && ~strcmp(list, 'pink') && ~strcmp(list, 'green') && ~strcmp(list, 'orange') && ~strcmp(list, 'yellow')
+        list = input('List must be a valid color. Please enter blue, pink, green, orange, or yellow:', 's');
     end
 end
