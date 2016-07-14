@@ -15,8 +15,12 @@ screenNumber = max(screens);
 rng('shuffle');
 KbName('UnifyKeyNames');
 
-subj = 's999';
-list = 'test';
+cond=input('Condition m or c: ', 's');
+cond = condcheck(cond);
+subj=input('Subject Number: ', 's');
+subj = subjcheck(subj);
+list=input('List color: ', 's');
+list = listcheck(list);
 
 %%%%%%%%
 %COLOR PARAMETERS
@@ -165,12 +169,20 @@ lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,$6.2f,%6.2f,%s\n';
 
 %%%%%Conditions and List Setup
 
-blockList = {'mass'}; %'count'};
-keys = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+if strcmp(cond,'m')
+    blockList = {'mass', 'count'};
+else
+    blockList = {'count', 'mass'};
+end
+
 correlated_values = [.75, 1.5, 2.25, 3, 3.75, 4.5, 5.25, 6, 6.75];
 anticorrelated_values = [9, 8.25, 7.5, 6.75, 6, 5.25, 4.5, 3.75, 3];
 
 %%%%%%RUNNING
+
+instructions(window, screenXpixels, screenYpixels, textsize, textspace)
+
+
 for condition = blockList
     if strcmp(condition,'mass')
         breakType = 'random';
@@ -217,7 +229,10 @@ for condition = blockList
     
     
      
-    for x = 1:1%length(trial_list)
+    for x = 1:length(trial_list)
+        
+        %fixation cross
+        fixCross(xCenter, yCenter, black, window, crossTime)
         
         %first animation, with star
         trial = trial_list{x};
@@ -235,6 +250,9 @@ for condition = blockList
             pauseTime, breakType, breakTime, screenNumber, starTexture, ...
             ifi, vbl)
         
+        %fixation cross
+        fixCross(xCenter, yCenter, black, window, crossTime)
+        
         %second animation, with heart
         numberOfLoops = trial(2);
         hearttotaltime = anticorrelated_values(numberOfLoops);
@@ -249,7 +267,9 @@ for condition = blockList
             pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
             ifi, vbl)
         
-        [response, time] = getResponse(window, breakType, textsize, screenYpixels);
+        %[response, time] = getResponse(window, breakType, textsize, screenYpixels);
+        response = 'na';
+        time = 0;
         fprintf(dataFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
             trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
         fprintf(subjFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
@@ -259,6 +279,8 @@ for condition = blockList
 
 end %ending the block
 %%%%%%Finishing and exiting
+
+finish(window, textsize, textspace)
 sca
 Priority(0);
 end
@@ -268,7 +290,14 @@ end
 
 
 
-%%%%%START/FINISH/BREAK FUNCTIONS%%%%%
+
+
+
+
+
+
+
+%%%%%ANIMATION FUNCTION%%%%%
 
 function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     minSpace, scale, xCenter, yCenter, window, ...
@@ -310,7 +339,53 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     WaitSecs(pauseTime);
 end
 
+%%%%%%INSTRUCTIONS AND FINISH FUNCTION%%%%%%%%%
+function [] = instructions(window, screenXpixels, screenYpixels, textsize, textspace)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    textcolor = white;
+    xedgeDist = floor(screenXpixels / 3);
+    quote = '''';
+    intro = ['Welcome to the experiment. In this experiment, you will be asked to answer',...
+        ' questions relative to short animations. There are 2 blocks in the experiment,',...
+        ' and each block contains 20 trials. In each block, you will be asked to evaluate',...
+        ' a different question. You will be given a short break between blocks. \n\n',...
+        ' For each animation, you will indicate whether the sentence accurately describes',...
+        ' that animation by pressing ' quote 'f' quote ' for YES or ' quote 'j' quote ' for NO.',...
+        ' You will be reminded of these response keys throughout. '];
+    
+    DrawFormattedText(window, intro, 'center', screenYpixels/7, textcolor, 70, 0, 0, textspace);
+    
+    intro2 = ['The experiment will proceed in two main parts. Please indicate to the experimenter if you have any questions, '...
+        'or are ready to begin the experiment. \n\n When the experimenter has '...
+        'left the room, you may press spacebar to begin.'];
+    
+    DrawFormattedText(window, intro2, 'center', 2*screenYpixels/3, textcolor, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    RestrictKeysForKbCheck(KbName('space'));
+    KbStrokeWait;
+    Screen('Flip', window);
+    RestrictKeysForKbCheck([]);
 
+end
+
+function [] = finish(window, textsize, textspace)
+    Screen('TextFont',window,'Arial');
+    Screen('TextSize',window,textsize);
+    black = BlackIndex(window);
+    white = WhiteIndex(window);
+    textcolor = white;
+    closing = ['Thank you for your participation.\n\nPlease let the ' ...
+        'experimenter know that you are finished.'];
+    DrawFormattedText(window, closing, 'center', 'center', textcolor, 70, 0, 0, textspace);
+    Screen('Flip', window);
+    % Wait for keypress
+    RestrictKeysForKbCheck(KbName('ESCAPE'));
+    KbStrokeWait;
+    Screen('Flip', window);
+end
 
 
 %%%%%%RESPONSE FUNCTION%%%%%
@@ -366,6 +441,8 @@ end
 %%%%%%FIXATION CROSS FUNCTION%%%%%
 
 function[] = fixCross(xCenter, yCenter, black, window, crossTime)
+    white = WhiteIndex(window);
+    Screen('FillRect', window, white/2);
     fixCrossDimPix = 40;
     xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
     yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
@@ -462,7 +539,7 @@ function [xpoints, ypoints] = getPoints(numberOfLoops, numberOfFrames)
     %smoothframes designates a few frames to smooth this out. It uses fewer
     %frames for the ellipse, and instead spends a few frames going from the
     %end of the ellipse to the origin.
-    smoothframes = 5;
+    smoothframes = 3;
     xpoints = [];
     ypoints = [];
     majorAxis = 2;
@@ -526,5 +603,64 @@ function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
 
     else
         Breaks = [];
+    end
+end
+
+%%%%%%%%%
+%INPUT CHECKING FUNCTIONS
+%%%%%%%%%
+
+function [subj] = subjcheck(subj)
+    if ~strncmpi(subj, 's', 1)
+        %forgotten s
+        subj = ['s', subj];
+    end
+    if strcmp(subj,'s')
+        subj = input(['Please enter a subject ' ...
+                'ID:'], 's');
+        subj = subjcheck(subj);
+    end
+    numstrs = ['1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'; '0'];
+    for x = 2:numel(subj)
+        if ~any(subj(x) == numstrs)
+            subj = input(['Subject ID ' subj ' is invalid. It should ' ...
+                'consist of an "s" followed by only numbers. Please use a ' ...
+                'different ID:'], 's');
+            subj = subjcheck(subj);
+            return
+        end
+    end
+    if (exist(['~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclaw' subj '.csv'], 'file') == 2) && ~strcmp(subj, 's999')...
+            && ~strcmp(subj,'s998')
+        temp = input(['Subject ID ' subj ' is already in use. Press y '...
+            'to continue writing to this file, or press '...
+            'anything else to try a new ID: '], 's');
+        if strcmp(temp,'y')
+            return
+        else
+            subj = input(['Please enter a new subject ' ...
+                'ID:'], 's');
+            subj = subjcheck(subj);
+        end
+    end
+end
+
+function [cond] = condcheck(cond)
+    while ~strcmp(cond, 'm') && ~strcmp(cond, 'c')
+        cond = input('Condition must be m or c. Please enter m (mass) or q (count):', 's');
+    end
+end
+
+function [list] = listcheck(list)
+    if strcmp(list, 'test')
+        check = input('Type y to continue using a test list. Type anything else to abort the program', 's');
+        if strcmp(check, 'y')
+            return
+        else
+            error('Process aborted')
+        end
+    end
+    while ~strcmp(list, 'blue') && ~strcmp(list, 'pink') && ~strcmp(list, 'green') && ~strcmp(list, 'orange') && ~strcmp(list, 'yellow')
+        list = input('List must be a valid color. Please enter blue, pink, green, orange, or yellow:', 's');
     end
 end
