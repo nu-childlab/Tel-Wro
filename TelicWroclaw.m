@@ -165,7 +165,7 @@ if initprint
     fprintf(dataFile, ['subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n']);
 end
 fprintf(subjFile, 'subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n');
-lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,$6.2f,%6.2f,%s\n';
+lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,%6.2f,%6.2f,%s\n';
 
 %%%%%Conditions and List Setup
 
