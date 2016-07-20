@@ -176,12 +176,16 @@ else
 end
 
 correlated_values = [.75, 1.5, 2.25, 3, 3.75, 4.5, 5.25, 6, 6.75];
-anticorrelated_values = [9, 8.25, 7.5, 6.75, 6, 5.25, 4.5, 3.75, 3];
+%anticorrelated_values = [9, 8.25, 7.5, 6.75, 6, 5.25, 4.5, 3.75, 3];
+anticorrelated_values = [2.25, 1.5, .75, 6.75, 6, 5.25, 4.5, 3.75, 3];
 
 %%%%%%RUNNING
 
 instructions(window, screenXpixels, screenYpixels, textsize, textspace)
 c = 1;
+training_list = [1;2;3;1;2;3];
+training_correlation = {'corr'; 'corr'; 'corr'; 'anti'; 'anti'; 'anti'};
+training_shape = {'star'; 'star'; 'star'; 'heart'; 'heart'; 'heart'};
 
 for condition = blockList
     if strcmp(condition,'mass')
@@ -191,38 +195,59 @@ for condition = blockList
         breakType='equal';
         cond = 'count';
     end
-
+    
+    training_list = training_list(randperm(length(training_list)),:);
+    training_correlation = training_correlation(randperm(length(training_correlation)),:);
+    training_shape = training_shape(randperm(length(training_shape)),:);
 
     %%%%%%TRAINING
-    numberOfLoops = 1;
-    totaltime = correlated_values(numberOfLoops);
-    loopTime = totaltime/numberOfLoops;
-    framesPerLoop = round(loopTime / ifi) + 1;
-
-    trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
-    animateEventLoops(numberOfLoops, framesPerLoop, ...
-        minSpace, scale, xCenter, yCenter, window, ...
-        pauseTime, breakType, breakTime, screenNumber, starTexture, ...
-        ifi, vbl)
     
-    trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
-    numberOfLoops = 2;
-    totaltime = correlated_values(numberOfLoops);
-    loopTime = totaltime/numberOfLoops;
-    framesPerLoop = round(loopTime / ifi) + 1;
-    animateEventLoops(numberOfLoops, framesPerLoop, ...
-        minSpace, scale, xCenter, yCenter, window, ...
-        pauseTime, breakType, breakTime, screenNumber, starTexture, ...
-        ifi, vbl)
-    
-    trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
-    totaltime = anticorrelated_values(numberOfLoops);
-    loopTime = totaltime/numberOfLoops;
-    framesPerLoop = round(loopTime / ifi) + 1;
-    animateEventLoops(numberOfLoops, framesPerLoop, ...
-        minSpace, scale, xCenter, yCenter, window, ...
-        pauseTime, breakType, breakTime, screenNumber, starTexture, ...
-        ifi, vbl)
+    for t = 1:length(training_list)
+        numberOfLoops = training_list(t);
+        if strcmp(training_correlation{t}, 'corr')
+            totaltime = correlated_values(numberOfLoops);
+        else
+            totaltime = anticorrelated_values(numberOfLoops);
+        end
+        loopTime = totaltime/numberOfLoops;
+        framesPerLoop = round(loopTime / ifi) + 1;
+        trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
+        animateEventLoops(numberOfLoops, framesPerLoop, ...
+            minSpace, scale, xCenter, yCenter, window, ...
+            pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+            ifi, vbl)
+    end
+        
+%     numberOfLoops = 1;
+%     totaltime = anticorrelated_values(numberOfLoops);
+%     loopTime = totaltime/numberOfLoops;
+%     framesPerLoop = round(loopTime / ifi) + 1;
+% 
+%     trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
+%     animateEventLoops(numberOfLoops, framesPerLoop, ...
+%         minSpace, scale, xCenter, yCenter, window, ...
+%         pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+%         ifi, vbl)
+%     
+%     trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
+%     numberOfLoops = 2;
+%     totaltime = anticorrelated_values(numberOfLoops);
+%     loopTime = totaltime/numberOfLoops;
+%     framesPerLoop = round(loopTime / ifi) + 1;
+%     animateEventLoops(numberOfLoops, framesPerLoop, ...
+%         minSpace, scale, xCenter, yCenter, window, ...
+%         pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+%         ifi, vbl)
+%     
+%     trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
+%     numberOfLoops = 3;
+%     totaltime = anticorrelated_values(numberOfLoops);
+%     loopTime = totaltime/numberOfLoops;
+%     framesPerLoop = round(loopTime / ifi) + 1;
+%     animateEventLoops(numberOfLoops, framesPerLoop, ...
+%         minSpace, scale, xCenter, yCenter, window, ...
+%         pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+%         ifi, vbl)
 
     testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
