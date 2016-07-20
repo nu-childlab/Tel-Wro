@@ -209,45 +209,28 @@ for condition = blockList
         else
             totaltime = anticorrelated_values(numberOfLoops);
         end
+        if strcmp(training_shape{t}, 'star')
+            training_image = starTexture;
+        else
+            training_image = heartTexture;
+        end
+        
+        if t == 1
+            phase = 1;
+        elseif t == length(training_list)
+            phase = 3;
+        else
+            phase = 2;
+        end
+               
         loopTime = totaltime/numberOfLoops;
         framesPerLoop = round(loopTime / ifi) + 1;
-        trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
+        trainSentence(window, textsize, textspace, phase, training_shape{t}, breakType, screenYpixels);
         animateEventLoops(numberOfLoops, framesPerLoop, ...
             minSpace, scale, xCenter, yCenter, window, ...
-            pauseTime, breakType, breakTime, screenNumber, starTexture, ...
+            pauseTime, breakType, breakTime, screenNumber, training_image, ...
             ifi, vbl)
     end
-        
-%     numberOfLoops = 1;
-%     totaltime = anticorrelated_values(numberOfLoops);
-%     loopTime = totaltime/numberOfLoops;
-%     framesPerLoop = round(loopTime / ifi) + 1;
-% 
-%     trainSentence(window, textsize, textspace, 1, breakType, screenYpixels);
-%     animateEventLoops(numberOfLoops, framesPerLoop, ...
-%         minSpace, scale, xCenter, yCenter, window, ...
-%         pauseTime, breakType, breakTime, screenNumber, starTexture, ...
-%         ifi, vbl)
-%     
-%     trainSentence(window, textsize, textspace, 2, breakType, screenYpixels);
-%     numberOfLoops = 2;
-%     totaltime = anticorrelated_values(numberOfLoops);
-%     loopTime = totaltime/numberOfLoops;
-%     framesPerLoop = round(loopTime / ifi) + 1;
-%     animateEventLoops(numberOfLoops, framesPerLoop, ...
-%         minSpace, scale, xCenter, yCenter, window, ...
-%         pauseTime, breakType, breakTime, screenNumber, starTexture, ...
-%         ifi, vbl)
-%     
-%     trainSentence(window, textsize, textspace, 3, breakType, screenYpixels);
-%     numberOfLoops = 3;
-%     totaltime = anticorrelated_values(numberOfLoops);
-%     loopTime = totaltime/numberOfLoops;
-%     framesPerLoop = round(loopTime / ifi) + 1;
-%     animateEventLoops(numberOfLoops, framesPerLoop, ...
-%         minSpace, scale, xCenter, yCenter, window, ...
-%         pauseTime, breakType, breakTime, screenNumber, starTexture, ...
-%         ifi, vbl)
 
     testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
@@ -504,7 +487,7 @@ end
 
 %%%%%SENTENCE/INSTRUCTIONS FUNCTIONS%%%%%
 
-function [] = trainSentence(window, textsize, textspace, phase, breakType, screenYpixels)
+function [] = trainSentence(window, textsize, textspace, phase, shape, breakType, screenYpixels)
     Screen('TextFont',window,'Arial');
     Screen('TextSize',window,textsize + 5);
     black = BlackIndex(window);
@@ -520,17 +503,20 @@ function [] = trainSentence(window, textsize, textspace, phase, breakType, scree
     
     switch phase
         case 1
-            DrawFormattedText(window, ['You' quote 're going to see the star ' verb 'ing.'],...
+            DrawFormattedText(window, ['You' quote 're going to see the ' shape ' ' verb 'ing.'],...
                 'center', 'center', white, 70, 0, 0, textspace);
         case 2
-            DrawFormattedText(window, ['Now you' quote 're going to see the star ' verb 'ing some more.'],...
+            DrawFormattedText(window, ['Now you' quote 're going to see the '...
+                shape ' doing some more ' verb 'ing.'],...
                 'center', 'center', white, 70, 0, 0, textspace);
         case 3
             if strcmp(breakType, 'random')
-                DrawFormattedText(window, ['Last one for now. You' quote 're going to see the star ' verb 'ing.'],...
+                DrawFormattedText(window, ['Last one for now. You' quote ...
+                    're going to see the ' shape ' ' verb 'ing.'],...
                     'center', 'center', white, 70, 0, 0, textspace);
             else
-                DrawFormattedText(window, ['Let' quote 's see that again. You' quote 're going to see the star ' verb 'ing some more.'],...
+                DrawFormattedText(window, ['Let' quote 's see that again. You' ...
+                    quote 're going to see the ' shape ' ' verb 'ing some more.'],...
                     'center', 'center', white, 70, 0, 0, textspace);
             end
     end
