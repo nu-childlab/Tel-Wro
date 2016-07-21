@@ -8,7 +8,7 @@ This experiment is a revision of previous Telic code, making it clearer and easi
 
 ~Changed the star image, and added a heart
 
-~Created a different timing setupd of anticorrelated values
+~Created a different timing setu of anticorrelated values
 
 ~Separated the loop animation into a distinct function, discrete from the main function
 
