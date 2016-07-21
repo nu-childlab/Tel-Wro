@@ -196,8 +196,9 @@ for condition = blockList
         cond = 'count';
     end
     
-    training_list = training_list(randperm(length(training_list)),:);
-    training_correlation = training_correlation(randperm(length(training_correlation)),:);
+    shuff = randperm(length(training_list));
+    training_list = training_list(shuff,:);
+    training_correlation = training_correlation(shuff,:);
     training_shape = training_shape(randperm(length(training_shape)),:);
 
     %%%%%%TRAINING
