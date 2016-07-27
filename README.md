@@ -14,8 +14,10 @@ This experiment is a revision of previous Telic code, making it clearer and easi
 
 ~Polar loops from previous iterations of Telic have been replaced with multiple ellipses. One ellipse corresponds to one petal of a polar loop. To this end, the point generating and break generating functions have been changed.
 
-~The randomized breaks are generated with a different method
+~The randomized breaks are generated with a different method, and the minimum number of frames between breaks was reduced from 20 to 10 to accomodate having shorter loop times
 
 ~The training functions have been condensed into a single function that draws a different sentence depending on the phase of the experiment
 
 ~The structure of training is changed. Previously, the experiment would progress through a set of 3 training animations for one, two, and three loops. For this experiment, there are 6 training animations, where there are 2 each of 1, 2, and 3 loops. Half of them are correlated, and the other half are anticorrelated. Half use the star image, and half use the heart image.
+
+~Data is saved to a different location
