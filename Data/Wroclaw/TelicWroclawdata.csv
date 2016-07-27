@@ -1,0 +1,43 @@
+subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response
+s999,2020.97,count,equal,blue,4,5,1,anti,  6.75,  6.00,f
+s999,1839.91,count,equal,blue,8,4,4,corr,  6.00,  3.00,j
+s999, 25.74,count,equal,blue,9,6,3,anti,  3.00,  5.25,f
+s999,  0.76,count,equal,blue,9,8,1,corr,  6.75,  6.00,f
+s999,  0.76,count,equal,blue,9,4,5,corr,  3.00,  3.00,f
+s999,  0.77,count,equal,blue,9,7,2,anti,  6.75,  4.50,f
+s999,  0.75,count,equal,blue,8,4,4,anti,  6.00,  6.75,f
+s999,  0.73,count,equal,blue,9,5,4,corr,  3.00,  3.75,f
+s999,  0.75,count,equal,blue,9,5,4,corr,  6.75,  3.75,f
+s999,  0.72,count,equal,blue,4,9,5,anti,  3.00,  3.00,f
+s999,  0.72,count,equal,blue,9,8,1,corr,  3.00,  6.00,f
+s999,  0.78,count,equal,blue,4,5,1,corr,  3.00,  3.75,f
+s999,  0.72,count,equal,blue,9,6,3,anti,  3.00,  5.25,f
+s999,  0.71,count,equal,blue,4,9,5,anti,  3.00,  3.00,f
+s999,  0.74,count,equal,blue,7,4,3,corr,  4.50,  3.00,f
+s999,  0.71,count,equal,blue,4,9,5,anti,  6.75,  3.00,f
+s999,  0.70,count,equal,blue,9,7,2,corr,  3.00,  5.25,f
+s999,  0.74,count,equal,blue,6,4,2,anti,  4.50,  6.75,f
+s999,  0.79,count,equal,blue,4,5,1,anti,  3.00,  6.00,f
+s999,  0.70,count,equal,blue,7,4,3,anti,  5.25,  6.75,f
+s999,  0.74,count,equal,blue,4,6,2,corr,  6.75,  4.50,f
+s999,  0.74,count,equal,blue,4,8,4,corr,  6.75,  6.00,f
+s999,2210.80,mass,random,blue,9,6,3,anti,  3.00,  5.25,f
+s999,1234.31,mass,random,blue,8,9,1,corr,  6.00,  6.75,f
+s999,1695.81,mass,random,blue,4,9,5,corr,  6.75,  6.75,j
+s999,  0.72,mass,random,blue,7,9,2,anti,  5.25,  3.00,j
+s999,  0.75,mass,random,blue,8,4,4,anti,  6.00,  6.75,j
+s999,  0.71,mass,random,blue,9,5,4,corr,  3.00,  3.75,j
+s999,  0.79,mass,random,blue,9,5,4,corr,  6.75,  3.75,j
+s999,  0.90,mass,random,blue,4,9,5,anti,  3.00,  3.00,j
+s999,  0.71,mass,random,blue,9,8,1,corr,  3.00,  6.00,j
+s999,  0.78,mass,random,blue,4,5,1,corr,  3.00,  3.75,j
+s999,  0.80,mass,random,blue,9,6,3,anti,  3.00,  5.25,j
+s999,  0.70,mass,random,blue,9,4,5,anti,  6.75,  6.75,j
+s999,  0.71,mass,random,blue,7,4,3,corr,  4.50,  3.00,j
+s999,  0.70,mass,random,blue,9,4,5,anti,  3.00,  6.75,j
+s999,  0.79,mass,random,blue,7,9,2,corr,  4.50,  6.75,j
+s999,6457.96,mass,random,blue,6,4,2,anti,  4.50,  6.75,j
+s999,1893.80,mass,random,blue,4,5,1,anti,  3.00,  6.00,j
+s999,8007.64,mass,random,blue,7,4,3,anti,  5.25,  6.75,j
+s999,668.81,mass,random,blue,4,6,2,corr,  6.75,  4.50,j
+s999,  0.71,mass,random,blue,8,4,4,corr,  3.75,  3.00,j

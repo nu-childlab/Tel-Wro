@@ -155,11 +155,11 @@ vbl = Screen('Flip', window);
 %%%%%%DATA FILES
 
 initprint = 0;
-if ~(exist('~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclawdata.csv', 'file') == 2)
+if ~(exist('Data/Wroclaw/TelicWroclawdata.csv', 'file') == 2)
     initprint = 1;
 end
-dataFile = fopen('~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclawdata.csv', 'a');
-subjFile = fopen(['~/Desktop/Data/TELIC/TELICWROCLAW/TelicWroclaw' subj '.csv'],'a');
+dataFile = fopen('Data/Wroclaw/TelicWroclawdata.csv', 'a');
+subjFile = fopen(['Data/Wroclaw/TelicWroclaw' subj '.csv'],'a');
 if initprint
     fprintf(dataFile, ['subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n']);
 end
