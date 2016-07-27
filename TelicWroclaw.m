@@ -1,9 +1,8 @@
 function [] = TelicWroclaw()
 
 %%%%%%FUNCTION DESCRIPTION
-%TelicZv1 is a prototype of TelicZ
+%TelicWroclaw is a Telic experiment that manipulates time correlation
 %It is meant for standalone use
-%It is currently incomplete.
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 Screen('Preference', 'SkipSyncTests', 0);
