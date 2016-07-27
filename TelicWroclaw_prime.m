@@ -1,8 +1,9 @@
-function [] = TelicWroclaw()
+function [] = TelicWroclaw_prime()
 
 %%%%%%FUNCTION DESCRIPTION
-%TelicWroclaw is a Telic experiment that manipulates time correlation
+%TelicWroclaw_prime is another version of TelicWroclaw
 %It is meant for standalone use
+%It is currently incomplete.
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 Screen('Preference', 'SkipSyncTests', 0);
@@ -73,12 +74,14 @@ squote = ' ''';
 
 correlation_list = {'corr';'corr';'corr';'corr';'corr';'corr';'corr';...
     'corr';'corr';'corr';'anti';'anti';'anti';'anti';'anti';'anti';...
+    'anti';'anti';'anti';'anti';'corr';'corr';'corr';'corr';'corr';'corr';'corr';...
+    'corr';'corr';'corr';'anti';'anti';'anti';'anti';'anti';'anti';...
     'anti';'anti';'anti';'anti'};
 
 if strcmp(list, 'test')
     trial_list = {[4 5; 5 4;]; [9 7; 7 9]};
     trial_list = [trial_list;trial_list];
-    correlation_list = {'corr';'corr';'anti';'anti'};
+    correlation_list = {'corr';'corr';'anti';'anti';'corr';'corr';'anti';'anti'};
 elseif strcmp(list, 'blue')
     trial_list = {[4 5; 5 4;]; [4 6; 6 4]; [4 7; 7 4]; [4 8; 8 4]; [4 9; 9 4]; ...
         [9 4; 4 9]; [9 5; 5 9]; [9 6; 6 9]; [9 7; 7 9]; [9 8; 8 9]};
@@ -103,7 +106,7 @@ end
 
 shuff = randperm(length(trial_list));
 trial_list = trial_list(shuff,:);
-correlation_list = correlation_list(shuff);
+correlation_list = correlation_list(randperm(length(correlation_list)));
 
 
 %%%%%%%Screen Prep
@@ -155,16 +158,16 @@ vbl = Screen('Flip', window);
 %%%%%%DATA FILES
 
 initprint = 0;
-if ~(exist('Data/Wroclaw/TelicWroclawdata.csv', 'file') == 2)
+if ~(exist('Data/WroclawPrime/TelicWroclawdata.csv', 'file') == 2)
     initprint = 1;
 end
-dataFile = fopen('Data/Wroclaw/TelicWroclawdata.csv', 'a');
-subjFile = fopen(['Data/Wroclaw/TelicWroclaw' subj '.csv'],'a');
+dataFile = fopen('Data/WroclawPrime/TelicWroclawdata.csv', 'a');
+subjFile = fopen(['Data/WroclawPrime/TelicWroclaw_' subj '.csv'],'a');
 if initprint
-    fprintf(dataFile, ['subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n']);
+    fprintf(dataFile, ['subj,time,cond,break,list,star loops,heart loops,contrast,star correlation,heart correlation,total star time,total heart time,response\n']);
 end
-fprintf(subjFile, 'subj,time,cond,break,list,star loops,heart loops,contrast,correlated?,total star time,total heart time,response\n');
-lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,%6.2f,%6.2f,%s\n';
+fprintf(subjFile, 'subj,time,cond,break,list,star loops,heart loops,contrast,star correlation,heart correlation,total star time,total heart time,response\n');
+lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,%s,%6.2f,%6.2f,%s\n';
 
 %%%%%Conditions and List Setup
 
@@ -181,7 +184,7 @@ anticorrelated_values = [2.25, 1.5, .75, 6.75, 6, 5.25, 4.5, 3.75, 3];
 %%%%%%RUNNING
 
 instructions(window, screenXpixels, screenYpixels, textsize, textspace)
-c = 1;
+break_screen = 1;
 training_list = [1;2;3;1;2;3];
 training_correlation = {'corr'; 'corr'; 'corr'; 'anti'; 'anti'; 'anti'};
 training_shape = {'star'; 'star'; 'star'; 'heart'; 'heart'; 'heart'};
@@ -194,6 +197,7 @@ for condition = blockList
         breakType='equal';
         cond = 'count';
     end
+    c = 1;
     
     shuff = randperm(length(training_list));
     training_list = training_list(shuff,:);
@@ -248,7 +252,7 @@ for condition = blockList
         trial = trial(randi([1,2]),:);
         numberOfLoops = trial(1);
         startotaltime = anticorrelated_values(numberOfLoops);
-        if strcmp(correlation_list{x}, 'corr')
+        if strcmp(correlation_list{c}, 'corr')
             startotaltime = correlated_values(numberOfLoops);
         end
         loopTime = startotaltime/numberOfLoops;
@@ -261,6 +265,10 @@ for condition = blockList
         
         %fixation cross
         fixCross(xCenter, yCenter, black, window, crossTime)
+        
+        %the correlation tracker changes twice as much; increments here and
+        %later
+        c = c + 1;
         
         %second animation, with heart
         numberOfLoops = trial(2);
@@ -276,18 +284,18 @@ for condition = blockList
             pauseTime, breakType, breakTime, screenNumber, heartTexture, ...
             ifi, vbl)
         
+        
         [response, time] = getResponse(window, breakType, textsize, screenYpixels);
-%         response = 'na';
-%         time = 0;
         fprintf(dataFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
-            trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
+            trial(2), abs(trial(1) - trial(2)),correlation_list{c-1},correlation_list{c},startotaltime,hearttotaltime,response);
         fprintf(subjFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
-            trial(2), abs(trial(1) - trial(2)),correlation_list{x},startotaltime,hearttotaltime,response);
+            trial(2), abs(trial(1) - trial(2)),correlation_list{c-1},correlation_list{c},startotaltime,hearttotaltime,response);
+        c = c + 1;
     end
-    if c
+    if break_screen
         breakScreen(window, textsize, textspace);
     end
-    c = c-1;
+    break_screen = break_screen-1;
 
 end %ending the block
 %%%%%%Finishing and exiting
