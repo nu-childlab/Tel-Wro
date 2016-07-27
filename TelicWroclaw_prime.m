@@ -158,16 +158,16 @@ vbl = Screen('Flip', window);
 %%%%%%DATA FILES
 
 initprint = 0;
-if ~(exist('Data/Wroclaw/TelicWroclawdata.csv', 'file') == 2)
+if ~(exist('Data/WroclawPrime/TelicWroclawdata.csv', 'file') == 2)
     initprint = 1;
 end
-dataFile = fopen('Data/Wroclaw/TelicWroclawdata.csv', 'a');
-subjFile = fopen(['Data/Wroclaw/TelicWroclaw' subj '.csv'],'a');
+dataFile = fopen('Data/WroclawPrime/TelicWroclawdata.csv', 'a');
+subjFile = fopen(['Data/WroclawPrime/TelicWroclaw_' subj '.csv'],'a');
 if initprint
     fprintf(dataFile, ['subj,time,cond,break,list,star loops,heart loops,contrast,star correlation,heart correlation,total star time,total heart time,response\n']);
 end
 fprintf(subjFile, 'subj,time,cond,break,list,star loops,heart loops,contrast,star correlation,heart correlation,total star time,total heart time,response\n');
-lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,%6.2f,%6.2f,%s\n';
+lineFormat = '%s,%6.2f,%s,%s,%s,%d,%d,%d,%s,%s,%6.2f,%6.2f,%s\n';
 
 %%%%%Conditions and List Setup
 
@@ -206,37 +206,37 @@ for condition = blockList
 
     %%%%%%TRAINING
     
-%     for t = 1:length(training_list)
-%         numberOfLoops = training_list(t);
-%         if strcmp(training_correlation{t}, 'corr')
-%             totaltime = correlated_values(numberOfLoops);
-%         else
-%             totaltime = anticorrelated_values(numberOfLoops);
-%         end
-%         if strcmp(training_shape{t}, 'star')
-%             training_image = starTexture;
-%         else
-%             training_image = heartTexture;
-%         end
-%         
-%         if t == 1
-%             phase = 1;
-%         elseif t == length(training_list)
-%             phase = 3;
-%         else
-%             phase = 2;
-%         end
-%                
-%         loopTime = totaltime/numberOfLoops;
-%         framesPerLoop = round(loopTime / ifi) + 1;
-%         trainSentence(window, textsize, textspace, phase, training_shape{t}, breakType, screenYpixels);
-%         animateEventLoops(numberOfLoops, framesPerLoop, ...
-%             minSpace, scale, xCenter, yCenter, window, ...
-%             pauseTime, breakType, breakTime, screenNumber, training_image, ...
-%             ifi, vbl)
-%     end
-% 
-%     testingSentence(window, textsize, textspace, breakType, screenYpixels)
+    for t = 1:length(training_list)
+        numberOfLoops = training_list(t);
+        if strcmp(training_correlation{t}, 'corr')
+            totaltime = correlated_values(numberOfLoops);
+        else
+            totaltime = anticorrelated_values(numberOfLoops);
+        end
+        if strcmp(training_shape{t}, 'star')
+            training_image = starTexture;
+        else
+            training_image = heartTexture;
+        end
+        
+        if t == 1
+            phase = 1;
+        elseif t == length(training_list)
+            phase = 3;
+        else
+            phase = 2;
+        end
+               
+        loopTime = totaltime/numberOfLoops;
+        framesPerLoop = round(loopTime / ifi) + 1;
+        trainSentence(window, textsize, textspace, phase, training_shape{t}, breakType, screenYpixels);
+        animateEventLoops(numberOfLoops, framesPerLoop, ...
+            minSpace, scale, xCenter, yCenter, window, ...
+            pauseTime, breakType, breakTime, screenNumber, training_image, ...
+            ifi, vbl)
+    end
+
+    testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
     %%%%%%RUNNING
     
@@ -286,8 +286,6 @@ for condition = blockList
         
         
         [response, time] = getResponse(window, breakType, textsize, screenYpixels);
-%         response = 'na';
-%         time = 0;
         fprintf(dataFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
             trial(2), abs(trial(1) - trial(2)),correlation_list{c-1},correlation_list{c},startotaltime,hearttotaltime,response);
         fprintf(subjFile, lineFormat, subj, time*1000, cond, breakType, list, trial(1),...
