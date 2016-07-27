@@ -1,8 +1,9 @@
-function [] = TelicWroclaw()
+function [] = TelicWroclaw_prime()
 
 %%%%%%FUNCTION DESCRIPTION
-%TelicWroclaw is a Telic experiment that manipulates time correlation
+%TelicWroclaw_prime is another version of TelicWroclaw
 %It is meant for standalone use
+%It is currently incomplete.
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 Screen('Preference', 'SkipSyncTests', 0);
