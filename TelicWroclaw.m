@@ -47,7 +47,7 @@ ifi = Screen('GetFlipInterval', window);
 
 
 
-minSpace = 20;
+minSpace = 10;
 %the minimum possible number of frames between steps
 
 breakTime = .5;

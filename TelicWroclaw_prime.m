@@ -48,7 +48,7 @@ ifi = Screen('GetFlipInterval', window);
 
 
 
-minSpace = 20;
+minSpace = 10;
 %the minimum possible number of frames between steps
 
 breakTime = .5;
@@ -206,37 +206,37 @@ for condition = blockList
 
     %%%%%%TRAINING
     
-    for t = 1:length(training_list)
-        numberOfLoops = training_list(t);
-        if strcmp(training_correlation{t}, 'corr')
-            totaltime = correlated_values(numberOfLoops);
-        else
-            totaltime = anticorrelated_values(numberOfLoops);
-        end
-        if strcmp(training_shape{t}, 'star')
-            training_image = starTexture;
-        else
-            training_image = heartTexture;
-        end
-        
-        if t == 1
-            phase = 1;
-        elseif t == length(training_list)
-            phase = 3;
-        else
-            phase = 2;
-        end
-               
-        loopTime = totaltime/numberOfLoops;
-        framesPerLoop = round(loopTime / ifi) + 1;
-        trainSentence(window, textsize, textspace, phase, training_shape{t}, breakType, screenYpixels);
-        animateEventLoops(numberOfLoops, framesPerLoop, ...
-            minSpace, scale, xCenter, yCenter, window, ...
-            pauseTime, breakType, breakTime, screenNumber, training_image, ...
-            ifi, vbl)
-    end
-
-    testingSentence(window, textsize, textspace, breakType, screenYpixels)
+%     for t = 1:length(training_list)
+%         numberOfLoops = training_list(t);
+%         if strcmp(training_correlation{t}, 'corr')
+%             totaltime = correlated_values(numberOfLoops);
+%         else
+%             totaltime = anticorrelated_values(numberOfLoops);
+%         end
+%         if strcmp(training_shape{t}, 'star')
+%             training_image = starTexture;
+%         else
+%             training_image = heartTexture;
+%         end
+%         
+%         if t == 1
+%             phase = 1;
+%         elseif t == length(training_list)
+%             phase = 3;
+%         else
+%             phase = 2;
+%         end
+%                
+%         loopTime = totaltime/numberOfLoops;
+%         framesPerLoop = round(loopTime / ifi) + 1;
+%         trainSentence(window, textsize, textspace, phase, training_shape{t}, breakType, screenYpixels);
+%         animateEventLoops(numberOfLoops, framesPerLoop, ...
+%             minSpace, scale, xCenter, yCenter, window, ...
+%             pauseTime, breakType, breakTime, screenNumber, training_image, ...
+%             ifi, vbl)
+%     end
+% 
+%     testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
     %%%%%%RUNNING
     
