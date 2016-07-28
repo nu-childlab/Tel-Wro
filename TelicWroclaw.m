@@ -286,9 +286,6 @@ for condition = blockList
     end
     if c
         breakScreen(window, textsize, textspace);
-        sca
-        clear all
-        error('test')
     end
     c = c-1;
 
