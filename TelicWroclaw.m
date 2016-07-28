@@ -286,6 +286,9 @@ for condition = blockList
     end
     if c
         breakScreen(window, textsize, textspace);
+        sca
+        clear all
+        error('test')
     end
     c = c-1;
 
@@ -618,10 +621,11 @@ end
 
 function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
     if strcmp(breakType, 'equal')
-        Breaks = 1 : totalpoints/loops : totalpoints;
+        %Breaks = 1 : totalpoints/loops : totalpoints;
+        Breaks = linspace(totalpoints/loops+1, totalpoints+1, loops);
 
     elseif strcmp(breakType, 'random')
-        %tbh I found this on stackpverflow and have no idea how it works
+        %tbh I found this on stackoverflow and have no idea how it works
         %lol
         E = totalpoints-(loops-1)*minSpace;
 
@@ -681,7 +685,7 @@ end
 
 function [cond] = condcheck(cond)
     while ~strcmp(cond, 'm') && ~strcmp(cond, 'c')
-        cond = input('Condition must be m or c. Please enter m (mass) or q (count): ', 's');
+        cond = input('Condition must be m or c. Please enter m (mass) or c (count): ', 's');
     end
 end
 
