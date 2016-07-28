@@ -624,17 +624,21 @@ function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
     elseif strcmp(breakType, 'random')
         %tbh I found this on stackoverflow and have no idea how it works
         %lol
-        E = totalpoints-(loops-1)*minSpace;
+        numberOfBreaks = loops - 1;
+        E = totalpoints-(numberOfBreaks-1)*minSpace;
 
-        ro = rand(loops+1,1);
-        rn = E*ro(1:loops)/sum(ro);
+        ro = rand(numberOfBreaks+1,1);
+        rn = E*ro(1:numberOfBreaks)/sum(ro);
 
-        s = minSpace*ones(loops,1)+rn;
+        s = minSpace*ones(numberOfBreaks,1)+rn;
 
         Breaks=cumsum(s)-1;
         
         Breaks = reshape(Breaks, 1, length(Breaks));
         Breaks = arrayfun(@(x) round(x),Breaks);
+        Breaks = [Breaks totalpoints];
+        %I'm adding one break on at the end, otherwise I'll end up with
+        %more "pieces" than in the equal condition.
 
     else
         Breaks = [];
