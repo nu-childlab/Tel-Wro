@@ -337,10 +337,6 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
     Screen('FillRect', window, grey);
     Screen('Flip', window);
     while pt <= totalpoints
-        %If the current point is a break point, pause
-        if any(pt == Breaks)
-            WaitSecs(breakTime);
-        end
         destRect = [xpoints(pt) - 128/2, ... %left
             ypoints(pt) - 128/2, ... %top
             xpoints(pt) + 128/2, ... %right
@@ -352,6 +348,10 @@ function [] = animateEventLoops(numberOfLoops, framesPerLoop, ...
         % Flip to the screen
         vbl  = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
         pt = pt + 1;
+        %If the current point is a break point, pause
+        if any(pt == Breaks)
+            WaitSecs(breakTime);
+        end
         
     end
     Screen('FillRect', window, black);
@@ -632,19 +632,23 @@ function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
     elseif strcmp(breakType, 'random')
         %tbh I found this on stackoverflow and have no idea how it works
         %lol
-        numberOfBreaks = loops - 1;
-        E = totalpoints-(numberOfBreaks-1)*minSpace;
+        if loops >1
+            numberOfBreaks = loops - 1;
+            E = totalpoints-(numberOfBreaks-1)*minSpace;
 
-        ro = rand(numberOfBreaks+1,1);
-        rn = E*ro(1:numberOfBreaks)/sum(ro);
+            ro = rand(numberOfBreaks+1,1);
+            rn = E*ro(1:numberOfBreaks)/sum(ro);
 
-        s = minSpace*ones(numberOfBreaks,1)+rn;
+            s = minSpace*ones(numberOfBreaks,1)+rn;
 
-        Breaks=cumsum(s)-1;
-        
-        Breaks = reshape(Breaks, 1, length(Breaks));
-        Breaks = arrayfun(@(x) round(x),Breaks);
-        Breaks = [Breaks totalpoints];
+            Breaks=cumsum(s)-1;
+
+            Breaks = reshape(Breaks, 1, length(Breaks));
+            Breaks = arrayfun(@(x) round(x),Breaks);
+            Breaks = [Breaks totalpoints];
+        else
+            Breaks = [totalpoints];
+        end
         %I'm adding one break on at the end, otherwise I'll end up with
         %more "pieces" than in the equal condition.
 
