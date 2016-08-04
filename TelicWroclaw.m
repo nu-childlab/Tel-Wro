@@ -619,14 +619,17 @@ end
 function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
     if strcmp(breakType, 'equal')
         %Breaks = 1 : totalpoints/loops : totalpoints;
-        Breaks = linspace(totalpoints/loops+1, totalpoints+1, loops);
+        Breaks = linspace(totalpoints/loops, totalpoints+1, loops);
+        Breaks = arrayfun(@(x) round(x),Breaks);
 
     elseif strcmp(breakType, 'random')
         %tbh I found this on stackoverflow and have no idea how it works
-        %lol
+        %http://stackoverflow.com/questions/31971344/generating-random-sequence-with-minimum-distance-between-elements-matlab/31977095#31977095
         if loops >1
             numberOfBreaks = loops - 1;
-            E = totalpoints-(numberOfBreaks-1)*minSpace;
+            %The -10 accounts for some distance away from the last point,
+            %which I add on separately.
+            E = (totalpoints-10)-(numberOfBreaks-1)*minSpace;
 
             ro = rand(numberOfBreaks+1,1);
             rn = E*ro(1:numberOfBreaks)/sum(ro);
@@ -637,9 +640,9 @@ function [Breaks] = makeBreaks(breakType, totalpoints, loops, minSpace)
 
             Breaks = reshape(Breaks, 1, length(Breaks));
             Breaks = arrayfun(@(x) round(x),Breaks);
-            Breaks = [Breaks totalpoints];
+            Breaks = [Breaks totalpoints+1];
         else
-            Breaks = [totalpoints];
+            Breaks = [totalpoints+1];
         end
         %I'm adding one break on at the end, otherwise I'll end up with
         %more "pieces" than in the equal condition.
