@@ -50,7 +50,7 @@ ifi = Screen('GetFlipInterval', window);
 minSpace = 10;
 %the minimum possible number of frames between steps
 
-breakTime = .5;
+breakTime = .25;
 %The number of seconds for each pause
 
 crossTime = 1;
@@ -194,45 +194,45 @@ for condition = blockList
         breakType='equal';
         cond = 'count';
     end
-    
-    shuff = randperm(length(training_list));
-    training_list = training_list(shuff,:);
-    training_correlation = training_correlation(shuff,:);
-    training_shape = training_shape(randperm(length(training_shape)),:);
-
-    %%%%%%TRAINING
-    
-    for t = 1:length(training_list)
-        numberOfLoops = training_list(t);
-        if strcmp(training_correlation{t}, 'corr')
-            totaltime = correlated_values(numberOfLoops);
-        else
-            totaltime = anticorrelated_values(numberOfLoops);
-        end
-        if strcmp(training_shape{t}, 'star')
-            training_image = starTexture;
-        else
-            training_image = heartTexture;
-        end
-        
-        if t == 1
-            phase = 1;
-        elseif t == length(training_list)
-            phase = 3;
-        else
-            phase = 2;
-        end
-               
-        loopTime = totaltime/numberOfLoops;
-        framesPerLoop = round(loopTime / ifi) + 1;
-        trainSentence(window, textsize, textspace, phase, training_shape{t}, breakType, screenYpixels);
-        animateEventLoops(numberOfLoops, framesPerLoop, ...
-            minSpace, scale, xCenter, yCenter, window, ...
-            pauseTime, breakType, breakTime, screenNumber, training_image, ...
-            ifi, vbl)
-    end
-
-    testingSentence(window, textsize, textspace, breakType, screenYpixels)
+%     
+%     shuff = randperm(length(training_list));
+%     training_list = training_list(shuff,:);
+%     training_correlation = training_correlation(shuff,:);
+%     training_shape = training_shape(randperm(length(training_shape)),:);
+% 
+%     %%%%%%TRAINING
+%     
+%     for t = 1:length(training_list)
+%         numberOfLoops = training_list(t);
+%         if strcmp(training_correlation{t}, 'corr')
+%             totaltime = correlated_values(numberOfLoops);
+%         else
+%             totaltime = anticorrelated_values(numberOfLoops);
+%         end
+%         if strcmp(training_shape{t}, 'star')
+%             training_image = starTexture;
+%         else
+%             training_image = heartTexture;
+%         end
+%         
+%         if t == 1
+%             phase = 1;
+%         elseif t == length(training_list)
+%             phase = 3;
+%         else
+%             phase = 2;
+%         end
+%                
+%         loopTime = totaltime/numberOfLoops;
+%         framesPerLoop = round(loopTime / ifi) + 1;
+%         trainSentence(window, textsize, textspace, phase, training_shape{t}, breakType, screenYpixels);
+%         animateEventLoops(numberOfLoops, framesPerLoop, ...
+%             minSpace, scale, xCenter, yCenter, window, ...
+%             pauseTime, breakType, breakTime, screenNumber, training_image, ...
+%             ifi, vbl)
+%     end
+% 
+%     testingSentence(window, textsize, textspace, breakType, screenYpixels)
 
     %%%%%%RUNNING
     

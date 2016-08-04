@@ -51,7 +51,7 @@ ifi = Screen('GetFlipInterval', window);
 minSpace = 10;
 %the minimum possible number of frames between steps
 
-breakTime = .5;
+breakTime = .25;
 %The number of seconds for each pause
 
 crossTime = 1;
