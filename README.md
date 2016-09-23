@@ -1,3 +1,5 @@
+Not the most updated/final versions of Wroclaw & Wroclaw Prime
+
 # Telic-Wroclaw
 An experiment programmed in Matlab R2015a. This experiment also uses Psychtoolbox version 3.0.12. For more information, see [the github page](https://github.com/Psychtoolbox-3/Psychtoolbox-3).
 
